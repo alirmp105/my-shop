@@ -77,6 +77,7 @@ const data = {
         { title: "محصولات", url: "/admin/products" },
         { title: "دسته‌بندی‌ها", url: "/admin/categories" },
         { title: "کد تخفیف", url: "/admin/coupon" },
+        { title: "برند ها", url: "/admin/brands " },
       ],
     },
     {

@@ -2,8 +2,10 @@ import Image from "next/image";
 import img from "@/public/images/gplus.jpg"
 import { brands } from "@/data/brands";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { getBrands } from "@/lib/data/brands";
 
-export function BrandsSlider() {
+export async function BrandsSlider() {
+  const brands = await getBrands()
   return (
     <section className="border-y bg-muted/30 py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -18,8 +20,8 @@ export function BrandsSlider() {
               <CarouselItem key={brand.id} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                 <div className="flex h-24 items-center justify-center rounded-xl border bg-background p-4 grayscale transition hover:grayscale-0">
                   <Image
-                    src={img}
-                    alt={brand.name}
+                    src={brand.image}
+                    alt={brand.nameFa}
                     width={140}
                     height={70}
                     className="h-auto max-h-12 w-auto"

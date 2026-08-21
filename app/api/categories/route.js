@@ -31,89 +31,6 @@ export async function GET() {
   }
 }
 
-// export async function POST(request) {
-//   try {
-//     await connectDB();
-//     const formData = await request.formData();
-//     const name = formData.get("name");
-//     const slug = formData.get("slug");
-//     const image = formData.get("image");
-
-//     if (!(image instanceof File)) {
-//       return NextResponse.json(
-//         { messgae: "انتخاب تصویر الزامی است" },
-//         { status: 400 },
-//       );
-//     }
-
-//     const validation = categoryCreateSchema.safeParse({
-//       name,
-//       slug,
-//       image: image.name,
-//     });
-
-//     console.log("validation : " , validation) ;
-    
-
-//     if (!validation.success) {
-//       return NextResponse.json(
-//         {
-//           message: "اطلاعات وارد شده صحیح نیست",
-//         },
-//         { status: 400 },
-//       );
-//     }
-
-//     const existingCategory = await Category.findOne({ slug });
-
-//     if (existingCategory) {
-//       return NextResponse.json(
-//         { message: "این دسته بندی وجود دارد" },
-//         { status: 409 },
-//       );
-//     }
-
-//     const uploadDir = path.join(
-//       process.cwd(),
-//       "public",
-//       "uploads",
-//       "categories",
-//     );
-
-//     await fs.mkdir(uploadDir, { recursive: true });
-
-//     const extension = path.extname(image.name);
-//     const fileName = ` ${crypto.randomUUID()}${extension}`;
-
-//     const filePath = path.join(uploadDir, fileName);
-
-//     // تبدیل File به Buffer
-//     const bytes = await image.arrayBuffer();
-//     const buffer = Buffer.from(bytes);
-
-//     // ذخیره فایل
-//     await fs.writeFile(filePath, buffer);
-
-//     // URL قابل استفاده در Frontend
-//     const imageUrl = `/uploads/categories/${fileName}`;
-
-//     // ایجاد Category
-//     const category = await Category.create({
-//       name,
-//       slug,
-//       image: imageUrl,
-//     });
-//   } catch (error) {
-//     console.error("Create category error:", error);
-//     return NextResponse.json(
-//       { message: "Failed to create category" },
-//       { status: 500 },
-//     );
-//   }
-// }
-
-// setting for file :
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const allowedTypes = [
@@ -215,7 +132,7 @@ export async function POST(request) {
 
     // نام یکتا برای فایل
     const extension = path.extname(image.name);
-    const fileName =` ${crypto.randomUUID()}${extension}`;
+    const fileName =`${crypto.randomUUID()}${extension}`;
 
     const filePath = path.join(uploadDir, fileName);
 

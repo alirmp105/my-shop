@@ -58,6 +58,10 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
+    brand : {
+     type : mongoose.Schema.Types.ObjectId,
+     ref : "Brand",
+    },
 
     images: {
       type: [productImageSchema],

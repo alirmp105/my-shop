@@ -1,45 +1,46 @@
 import { connectDB } from "@/lib/mongodb";
-import Category from "@/models/Category";
+
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { categoryUpdateSchema } from "@/schemas/categorySchema";
+import { brandUpdateSchema } from "@/schemas/brandSchema";
 import fs from "fs/promises";
 import path from "path";
+import Brand from "@/models/Brand";
 
 function isValidId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function GET(request, { params }) {
-  const { id } = await params;
-  console.log(params);
-  console.log(id);
+// export async function GET(request, { params }) {
+//   const { id } = await params;
+//   console.log(params);
+//   console.log(id);
 
-  try {
-    await connectDB();
+//   try {
+//     await connectDB();
 
-    const category = await Category.findById(id).lean();
+//     const brand = await brand.findById(id).lean();
 
-    if (!category) {
-      console.error("error : ", error);
-      return NextResponse.json(
-        { message: "category was not found " },
-        { status: 404 },
-      );
-    }
+//     if (!brand) {
+//       console.error("error : ", error);
+//       return NextResponse.json(
+//         { message: "brand was not found " },
+//         { status: 404 },
+//       );
+//     }
 
-    return NextResponse.json({
-      id: category._id.toString(),
-      name: category.name,
-    });
-  } catch (error) {
-    console.error("error", error);
-    return NextResponse.json(
-      { message: "failed to fetch category " },
-      { status: 500 },
-    );
-  }
-}
+//     return NextResponse.json({
+//       id: brand._id.toString(),
+//       name: brand.name,
+//     });
+//   } catch (error) {
+//     console.error("error", error);
+//     return NextResponse.json(
+//       { message: "failed to fetch brand " },
+//       { status: 500 },
+//     );
+//   }
+// }
 
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -59,10 +60,10 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // پیدا کردن Category
-    const category = await Category.findById(id);
+    // پیدا کردن brand
+    const brand = await Brand.findById(id);
 
-    if (!category) {
+    if (!brand) {
       return NextResponse.json(
         { message: "دسته بندی پیدا نشد" },
         { status: 404 },
@@ -71,7 +72,8 @@ export async function PUT(request, { params }) {
 
     const formData = await request.formData();
 
-    const name = formData.get("name");
+   const nameFa = formData.get("nameFa");
+    const nameEn = formData.get("nameEn");
     const slug = formData.get("slug");
     const image = formData.get("image");
 
@@ -81,8 +83,9 @@ export async function PUT(request, { params }) {
       image instanceof File && image.size > 0 ? image : undefined;
 
     // Validation
-    const validation = categoryUpdateSchema.safeParse({
-      name,
+    const validation = brandUpdateSchema.safeParse({
+      nameFa,
+      nameEn,
       slug,
       image: newImage,
     });
@@ -98,13 +101,13 @@ export async function PUT(request, { params }) {
     }
 
     // بررسی duplicate بودن name یا slug
-    const existingCategory = await Category.findOne({
+    const existingbrand = await Brand.findOne({
       _id: { $ne: id },
 
-      $or: [{ name: name.trim() }, { slug: slug.trim() }],
+      $or: [{ nameEn: nameEn.trim() }, { slug: slug.trim() }],
     });
 
-    if (existingCategory) {
+    if (existingbrand) {
       return NextResponse.json(
         {
           message: "دسته بندی با این نام یا slug قبلاً ایجاد شده است",
@@ -113,7 +116,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    let imageUrl = category.image;
+    let imageUrl = brand.image;
     let newFilePath = null;
 
     // اگر عکس جدید وجود داشت
@@ -165,13 +168,14 @@ export async function PUT(request, { params }) {
     }
 
     // آپدیت MongoDB
-    category.name = name.trim();
-    category.slug = slug.trim();
-    category.image = imageUrl;
+    brand.nameFa = nameFa.trim();
+    brand.nameEn = nameEn.trim();
+    brand.slug = slug.trim();
+    brand.image = imageUrl;
 
-    await category.save();
+    await brand.save();
 
-    const oldImageUrl = category.image;
+    const oldImageUrl = brand.image;
     // اگر عکس جدید ذخیره شد،
     // عکس قبلی را حذف کن
     if (newImage && oldImageUrl) {
@@ -180,28 +184,28 @@ export async function PUT(request, { params }) {
       try {
         await fs.unlink(oldFilePath);
       } catch (error) {
-        console.error("old category image delete error : ", error);
+        console.error("old brand image delete error : ", error);
       }
 
-      // این قسمت باید قبل از تغییر category.image ذخیره شده باشد
+      // این قسمت باید قبل از تغییر brand.image ذخیره شده باشد
     }
 
     return NextResponse.json(
       {
         message: "دسته بندی با موفقیت ویرایش شد",
-        category,
+        brand,
       },
       { status: 200 },
     );
   } catch (error) {
-    if (newFilePath) {
-      try {
-        await fs.unlink(newFilePath);
-      } catch (deleteError) {
-        console.error(deleteError);
-      }
-    }
-    console.error("UPDATE CATEGORY ERROR:", error);
+    // if (newFilePath) {
+    //   try {
+    //     await fs.unlink(newFilePath);
+    //   } catch (deleteError) {
+    //     console.error(deleteError);
+    //   }
+    // }
+    console.error("UPDATE brand ERROR:", error);
 
     return NextResponse.json(
       {
@@ -224,29 +228,36 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // پیدا کردن Category
-    const category = await Category.findById(id);
+    // پیدا کردن brand
+    const brand = await Brand.findById(id);
 
-    if (!category) {
+    if (!brand) {
       return NextResponse.json(
         { message: "دسته بندی پیدا نشد" },
         { status: 404 },
       );
     }
 
-    const imageUrl = category.image;
-    await Category.findByIdAndDelete(id);
+    const imageUrl = brand.image;
+    console.log("image url : " , imageUrl);
+    
+    await Brand.findByIdAndDelete(id);
 
     //حذف فایل تصویر
 
-    if (imageUrl) {
+     if (imageUrl) {
       const imagePath = path.join(process.cwd(), "public", imageUrl);
-      try {
-        await fs.unlink(imagePath);
-      } catch (error) {
-        console.error("delete category image error ", error);
-      }
+      console.log('image path : ' , imagePath);
+        try {
+     
+      await fs.unlink(imagePath);
+    } catch (error) {
+      console.error("delete brand image error ", error);
     }
+      
+    }
+
+  
 
     return NextResponse.json(
       { message: "دسته بندی  با موفقیت حذف شد" },

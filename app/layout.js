@@ -44,11 +44,11 @@ export default function RootLayout({ children }) {
         
         <DirectionProvider direction="rtl">
           <CartProvider>
-            <Header />
+            
             <main className="">
             {children}
             </main>
-            <Footer />
+            
             </CartProvider>
           <Toaster />
         </DirectionProvider>
