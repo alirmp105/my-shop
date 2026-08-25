@@ -5,10 +5,8 @@ import {connectDB} from "@/lib/mongodb";
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
 import { authOptions } from "@/lib/auth";
-
-
-
-
+import { updateCartItem } from "@/lib/data/cart";
+import { removeCartItem } from "@/lib/data/cart";
 
 export async function POST(request) {
   try {
@@ -224,6 +222,131 @@ export async function GET() {
       {
         success: false,
         message: "Something went wrong",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+
+    const { productId, quantity } = body;
+
+    if (!productId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Product ID is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      quantity === undefined ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Quantity must be an integer greater than 0",
+        },
+        { status: 400 }
+      );
+    }
+
+    const cart = await updateCartItem(
+      session.user.id,
+      productId,
+      quantity
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Cart updated successfully",
+        cart,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("PATCH /api/cart error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          error.message || "Failed to update cart",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const productId = searchParams.get("productId");
+
+    if (!productId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Product ID is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const cart = await removeCartItem(
+      session.user.id,
+      productId
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Product removed from cart",
+        cart,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("DELETE /api/cart error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          error.message || "Failed to remove cart item",
       },
       { status: 500 }
     );

@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 
 export function CartItemControl({ product }) {
-  const {
-    addToCart,
-    getCartItemQuantity,
-  } = useCart();
+ const {
+  addToCart,
+  updateCartItem,
+  removeFromCart,
+  getCartItemQuantity,
+} = useCart();
 
   const quantity = getCartItemQuantity(product.id);
 
@@ -34,17 +36,41 @@ export function CartItemControl({ product }) {
     }
   }
 
-  function handleIncrease() {
-    // مرحله بعد: PATCH
+ async function handleIncrease() {
+  try {
+    await updateCartItem(
+      product.id,
+      quantity + 1
+    );
+  } catch (error) {
+    toast.error(error.message);
   }
+}
 
-  function handleDecrease() {
-    // مرحله بعد: PATCH
+  async function handleDecrease() {
+  try {
+    await updateCartItem(
+      product.id,
+      quantity - 1
+    );
+  } catch (error) {
+    toast.error(error.message);
   }
+}
 
-  function handleRemove() {
-    // مرحله بعد: DELETE
+ async function handleRemove() {
+  try {
+    await removeFromCart(product.id);
+    console.log("delete id ;" , product.id);
+    
+
+    toast.success(
+      `«${product.name}» از سبد خرید حذف شد.`
+    );
+  } catch (error) {
+    toast.error(error.message);
   }
+}
 
   if (quantity === 0) {
     return (

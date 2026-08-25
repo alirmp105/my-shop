@@ -122,7 +122,7 @@ export function CartProvider({ children }) {
       const data = await removeFromCartRequest(
         productId
       );
-
+      
       setCart(data.cart);
 
       return data.cart;
@@ -177,22 +177,22 @@ export function CartProvider({ children }) {
       0
     ) ?? 0;
 
-  const value = {
-    cart,
-    loading,
-    error,
+const value = {
+  cart,
+  loading,
+  error,
 
-    loadCart,
+  loadCart,
 
-    addToCart,
-    updateCartItem,
-    removeFromCart,
+  addToCart,
+  updateCartItem,
+  removeFromCart,
 
-    getCartItem,
-    getCartItemQuantity,
+  getCartItem,
+  getCartItemQuantity,
 
-    cartItemsCount,
-  };
+  cartItemsCount,
+};
 
   return (
     <CartContext.Provider value={value}>

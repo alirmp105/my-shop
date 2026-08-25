@@ -15,7 +15,7 @@ const Toaster = ({
       className="toaster group"
       icons={{
         success: (
-          <CircleCheckIcon className="size-4" />
+          <CircleCheckIcon className="size-4 "/>
         ),
         info: (
           <InfoIcon className="size-4" />

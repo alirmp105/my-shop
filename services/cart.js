@@ -4,9 +4,7 @@ async function handleResponse(response) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      data.message || "Something went wrong"
-    );
+    throw new Error(data.message || "Something went wrong");
   }
 
   return data;
@@ -35,10 +33,7 @@ export async function addToCart(productId, quantity = 1) {
   return handleResponse(response);
 }
 
-export async function updateCartItem(
-  productId,
-  quantity
-) {
+export async function updateCartItem(productId, quantity) {
   const response = await fetch(CART_API_URL, {
     method: "PATCH",
 
@@ -56,17 +51,12 @@ export async function updateCartItem(
 }
 
 export async function removeFromCart(productId) {
-  const response = await fetch(CART_API_URL, {
-    method: "DELETE",
-
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `api/cart?productId=${encodeURIComponent(productId)}`,
+    {
+      method: "DELETE",
     },
-
-    body: JSON.stringify({
-      productId,
-    }),
-  });
+  );
 
   return handleResponse(response);
 }
