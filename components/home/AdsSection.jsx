@@ -19,6 +19,7 @@ const AdsSection = () => {
         </section>
       </section>
     </section>
+    
   );
 };
 

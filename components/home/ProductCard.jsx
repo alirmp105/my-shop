@@ -2,24 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
-import { toast } from "sonner";
+// import { ShoppingCart } from "lucide-react";
+// import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { StarRating } from "@/components/home/StarRating";
-import { useCart } from "@/lib/cart-context";
+// import { useCart } from "@/lib/cart-context";
 import { formatToman } from "@/lib/utils";
+import {CartItemControl} from "../cart/CartItemControl";
+// import { addToCart } from "@/services/cart";
 export function ProductCard({ product }) {
-  const { addItem } = useCart();
+  // const { addItem } = useCart();
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
   const handleAdd = () => {
-    addItem(product);
+    addToCart(product);
     toast.success(`«${product.name}» به سبد خرید اضافه شد.`);
   };
 
@@ -59,10 +61,11 @@ export function ProductCard({ product }) {
       </CardContent>
 
       <CardFooter className="px-4 pb-4">
-        <Button onClick={handleAdd} className="w-full" size="sm">
+        {/* <Button onClick={handleAdd} className="w-full" size="sm">
           <ShoppingCart />
           افزودن به سبد
-        </Button>
+        </Button> */}
+        <CartItemControl product={product} />
       </CardFooter>
     </Card>
   );

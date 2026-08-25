@@ -11,7 +11,7 @@ const Home = () => {
       <HeroSection />
       <CategoriesSection />
       <TrendingProducts />
-      <AdsSection />
+      {/* <AdsSection /> */}
       <DiscountBanner />
       <BrandsSlider />
     </main>

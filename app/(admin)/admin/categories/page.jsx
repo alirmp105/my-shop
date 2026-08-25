@@ -72,7 +72,7 @@ const Category = () => {
     }
   };
 
-  console.log("categories :" , categories);
+
    
 
   return (

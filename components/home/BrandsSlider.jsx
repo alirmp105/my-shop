@@ -1,6 +1,4 @@
 import Image from "next/image";
-import img from "@/public/images/gplus.jpg"
-import { brands } from "@/data/brands";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { getBrands } from "@/lib/data/brands";
 
