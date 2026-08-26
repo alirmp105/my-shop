@@ -1,6 +1,7 @@
 "use client";
-
+import { useState } from "react";
 import {
+  LoaderCircle,
   Minus,
   Plus,
   ShoppingCart,
@@ -12,81 +13,141 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 
 export function CartItemControl({ product }) {
- const {
-  addToCart,
-  updateCartItem,
-  removeFromCart,
-  getCartItemQuantity,
-} = useCart();
+  const {
+    addToCart,
+    updateCartItem,
+    removeFromCart,
+    getCartItemQuantity,
+  } = useCart();
 
-  const quantity = getCartItemQuantity(product.id);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const productId = product._id;
+
+  const quantity = getCartItemQuantity(productId);
 
   const isOutOfStock = product.stock <= 0;
   const isMaxQuantity = quantity >= product.stock;
 
   async function handleAdd() {
+    if (isUpdating || isOutOfStock) {
+      return;
+    }
+
     try {
-      await addToCart(product.id);
+      setIsUpdating(true);
+
+      await addToCart(productId, 1);
 
       toast.success(
-       ` «${product.name}» به سبد خرید اضافه شد.`
+        `«${product.name}» به سبد خرید اضافه شد.`
       );
     } catch (error) {
-      toast.error(error.message);
+      console.error("Add to cart error:", error);
+
+      toast.error(
+        error.message || "افزودن به سبد خرید ناموفق بود."
+      );
+    } finally {
+      setIsUpdating(false);
     }
   }
 
- async function handleIncrease() {
-  try {
-    await updateCartItem(
-      product.id,
-      quantity + 1
-    );
-  } catch (error) {
-    toast.error(error.message);
+  async function handleIncrease() {
+    if (isUpdating || isMaxQuantity) {
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+
+      await updateCartItem(
+        productId,
+        quantity + 1
+      );
+    } catch (error) {
+      console.error(
+        "Increase cart item error:",
+        error
+      );
+
+      toast.error(
+        error.message || "افزایش تعداد ناموفق بود."
+      );
+    } finally {
+      setIsUpdating(false);
+    }
   }
-}
 
   async function handleDecrease() {
-  try {
-    await updateCartItem(
-      product.id,
-      quantity - 1
-    );
-  } catch (error) {
-    toast.error(error.message);
-  }
-}
+    if (isUpdating || quantity <= 1) {
+      return;
+    }
 
- async function handleRemove() {
-  try {
-    await removeFromCart(product.id);
-    console.log("delete id ;" , product.id);
-    
+    try {
+      setIsUpdating(true);
 
-    toast.success(
-      `«${product.name}» از سبد خرید حذف شد.`
-    );
-  } catch (error) {
-    toast.error(error.message);
+      await updateCartItem(
+        productId,
+        quantity - 1
+      );
+    } catch (error) {
+      console.error(
+        "Decrease cart item error:",
+        error
+      );
+
+      toast.error(
+        error.message || "کاهش تعداد ناموفق بود."
+      );
+    } finally {
+      setIsUpdating(false);
+    }
   }
-}
+
+  async function handleRemove() {
+    if (isUpdating) {
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+
+      await removeFromCart(productId);
+
+      toast.success(
+        `«${product.name}» از سبد خرید حذف شد.`
+      );
+    } catch (error) {
+      console.error(
+        "Remove cart item error:",
+        error
+      );
+
+      toast.error(
+        error.message || "حذف از سبد خرید ناموفق بود."
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  }
 
   if (quantity === 0) {
     return (
       <Button
         type="button"
         onClick={handleAdd}
-        disabled={isOutOfStock}
+        disabled={isUpdating || isOutOfStock}
         className="w-full"
         size="sm"
-        
       >
         <ShoppingCart />
 
         {isOutOfStock
           ? "ناموجود"
-          : "افزودن به سبد"}
+          : isUpdating
+            ? "در حال افزودن..."
+            : "افزودن به سبد"}
       </Button>
     );
   }
@@ -96,44 +157,48 @@ export function CartItemControl({ product }) {
       <Button
         type="button"
         
-        className="rounded"
+        className="rounded-l-none border-0 px-4"
         onClick={handleIncrease}
-        disabled={isMaxQuantity}
+       
+        disabled={isUpdating || isMaxQuantity}
         aria-label="افزایش تعداد"
-        //  variant="outline"
       >
         <Plus />
       </Button>
 
-      <div className="flex flex-1 items-center justify-center border-y text-sm font-medium">
-        {quantity}
+      <div
+        className="flex flex-1 items-center justify-center border-y text-sm font-medium"
+        aria-live="polite"
+      >
+        {isUpdating ? (
+          <LoaderCircle className="size-4 animate-spin" />
+        ) : (
+          quantity
+        )}
       </div>
 
       <Button
         type="button"
-        // size="sm"
-        className="rounded"
-        //  variant={`{${quantity ===1 ? "destructive" : "outline"} `}
-        variant= {
-          quantity ===1 ? "destructive" : "outline"
-        }
+      
+        className={`rounded-r-none px-4 ${
+          quantity === 1 ? "border-0" : ""
+        }`}
         onClick={
           quantity === 1
             ? handleRemove
             : handleDecrease
         }
+        variant = {
+          quantity === 1 ? "destructive" : "outline"
+        }
+        disabled={isUpdating}
         aria-label={
           quantity === 1
-            ? "حذف از سبد"
+            ? "حذف از سبد خرید"
             : "کاهش تعداد"
         }
-
       >
-        {quantity === 1 ? (
-          <Trash2  />
-        ) : (
-          <Minus />
-        )}
+        {quantity === 1 ? <Trash2 /> : <Minus />}
       </Button>
     </div>
   );

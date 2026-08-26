@@ -27,9 +27,10 @@ export async function addToCart(productId, quantity = 1) {
     body: JSON.stringify({
       productId,
       quantity,
-    }),
+    }), 
   });
-
+  
+  
   return handleResponse(response);
 }
 

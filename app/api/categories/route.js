@@ -15,7 +15,7 @@ export async function GET() {
 
     return NextResponse.json(
       categories.map((category) => ({
-        id: category._id.toString(),
+        _id: category._id.toString(),
         name: category.name,
         image : category.image,
 

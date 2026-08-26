@@ -71,6 +71,8 @@ export async function DELETE(req, { params }) {
     await connectDB();
 
     const { id } = await params;
+    
+    
 
     // بررسی ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -177,6 +179,8 @@ export async function PUT(req, { params }) {
     await connectDB();
 
     const { id } = await params;
+    console.log(id);
+    console.log(params);
 
 
     // ==========================================

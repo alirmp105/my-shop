@@ -97,9 +97,9 @@ const ProductList = ({ products }) => {
         </TableHeader>
         <TableBody>
           {products?.map((product, index) => (
-            <TableRow key={product.id}>
+            <TableRow key={product._id}>
               <TableCell className="font-medium">
-                {product.id.slice(20, 24)}
+                {product._id.slice(20, 24)}
               </TableCell>
               <TableCell className="line-clamp-1">{product.name}</TableCell>
               <TableCell>
@@ -145,14 +145,14 @@ const ProductList = ({ products }) => {
 
               <TableCell className="text-right">
                 <Button asChild variant="outline">
-                  <Link href={`/admin/products/${product.id}/edit`}>
+                  <Link href={`/admin/products/${product._id}/edit`}>
                     <PencilIcon />
                   </Link>
                 </Button>
                 <Button
                   variant="destructive"
                   className="cursor-pointer mx-3"
-                  onClick={() => handleDelete(product.id)}
+                  onClick={() => handleDelete(product._id)}
                   // disabled={deletingId === (product._id || product.id)}
                 >
                   <Trash2Icon />

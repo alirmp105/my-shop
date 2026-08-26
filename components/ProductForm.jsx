@@ -85,7 +85,7 @@ const ProductForm = ({
       description: product?.description || "",
       price: product?.price ?? "",
       stock: product?.stock ?? "",
-      category: product?.category?.id || "",
+      category: product?.category?._id || "",
     },
   });
 
@@ -408,7 +408,7 @@ const ProductForm = ({
       // ======================================
 
       const url = isEdit
-        ? `/api/products/${product.id}`
+        ? `/api/products/${product._id}`
         : "/api/products";
 
       const method = isEdit
@@ -738,8 +738,8 @@ const ProductForm = ({
                         (category) => (
 
                           <SelectItem
-                            key={category.id}
-                            value={category.id}
+                            key={category._id}
+                            value={category._id}
                           >
                             {category.name}
                           </SelectItem>

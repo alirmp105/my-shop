@@ -82,9 +82,9 @@ const Inventory = ({ products }) => {
         </TableHeader>
         <TableBody>
           {products?.map((product) => (
-            <TableRow key={product.id}  >
+            <TableRow key={product._id}  >
               <TableCell className="font-medium">
-                {product.id.slice(20, 24)}
+                {product._id.slice(20, 24)}
               </TableCell>
               <TableCell className="line-clamp-1">{product.name}</TableCell>
              

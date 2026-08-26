@@ -17,12 +17,10 @@ import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-const BrandList = ({brands}) => {
-
-    const [error, setError] = useState(null);
-    const [deletingId, setDeletingId] = useState(null);
-    const router = useRouter();
-
+const BrandList = ({ brands }) => {
+  const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const router = useRouter();
 
   const handleDelete = async (id) => {
     setError("");
@@ -37,9 +35,9 @@ const BrandList = ({brands}) => {
       }
 
       toast.success("برند حذف شد", { position: "top-center" });
-      router.refresh()
+      router.refresh();
     } catch (error) {
-      setError("error from clirent ",error.message);
+      setError("error from clirent ", error.message);
     } finally {
       setDeletingId(null);
     }
@@ -72,9 +70,9 @@ const BrandList = ({brands}) => {
         </TableHeader>
         <TableBody>
           {brands?.map((brand) => (
-            <TableRow key={brand._id || brand.id}>
+            <TableRow key={brand._id || brand._id}>
               <TableCell className="font-medium">
-                {brand.id.slice(20, 24)}
+                {brand._id.slice(20, 24)}
               </TableCell>
               <TableCell>{brand.nameFa}</TableCell>
               <TableCell>
@@ -84,18 +82,19 @@ const BrandList = ({brands}) => {
                   width={40}
                   height={40}
                 />
+              
               </TableCell>
               <TableCell className="text-right">
                 <Button asChild variant="outline">
-                  <Link href={`/admin/brands/${brand._id || brand.id}/edit`}>
+                  <Link href={`/admin/brands/${brand._id || brand._id}/edit`}>
                     <PencilIcon />
                   </Link>
                 </Button>
                 <Button
                   variant="destructive"
                   className="cursor-pointer mx-3"
-                  onClick={() => handleDelete(brand._id || brand.id)}
-                  disabled={deletingId === (brand._id || brand.id)}
+                  onClick={() => handleDelete(brand._id || brand._id)}
+                  disabled={deletingId === (brand._id || brand._id)}
                 >
                   <Trash2Icon />
                 </Button>

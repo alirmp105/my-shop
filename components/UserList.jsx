@@ -102,9 +102,9 @@ const UserList = ({ users }) => {
         </TableHeader>
         <TableBody>
           {users?.map((user) => (
-            <TableRow key={user.id}>
+            <TableRow key={user._id}>
               <TableCell className="font-medium">
-                {user.id.slice(20, 24)}
+                {user._id.slice(20, 24)}
               </TableCell>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>

@@ -81,7 +81,7 @@ const handleSubmit = async (e) => {
 
   try {
     const res = await fetch(
-      `/api/inventory/${product.id}`,
+      `/api/inventory/${product._id}`,
       {
         method: "PATCH",
         headers: {

@@ -23,7 +23,7 @@ async function getProduct(id) {
   }
 
   return {
-    id: product._id.toString(),
+    _id: product._id.toString(),
 
     name: product.name,
 
@@ -37,7 +37,7 @@ async function getProduct(id) {
 
     category: product.category
       ? {
-          id: product.category._id.toString(),
+          _id: product.category._id.toString(),
           name: product.category.name,
         }
       : null,
@@ -62,7 +62,7 @@ async function getCategories() {
     .lean();
 
   return categories.map((category) => ({
-    id: category._id.toString(),
+    _id: category._id.toString(),
     name: category.name,
   }));
 }

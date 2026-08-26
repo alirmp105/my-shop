@@ -15,7 +15,7 @@ export async function GET() {
 
     return NextResponse.json(
       products.map((product) => ({
-        id: product._id.toString(),
+        _id: product._id.toString(),
         name: product.name,
         description: product.description,
         slug : product.slug,

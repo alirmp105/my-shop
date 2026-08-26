@@ -14,8 +14,8 @@ import Link from "next/link";
 export async function TrendingProducts() {
   const products = await getTrendProducts();
   return (
-    <section id="trending" className="py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="trending" className="py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-2 text-center sm:text-right flex justify-between">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
             محصولات پربازدید
@@ -35,7 +35,7 @@ export async function TrendingProducts() {
           <CarouselContent>
             {products.map((product) => (
               <CarouselItem
-                key={product.id}
+                key={product._id}
                 className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
               >
                 <ProductCard product={product} />

@@ -12,7 +12,7 @@ export async function getProducts() {
   const products = await Product.find().populate("category");
 
   return products.map((product) => ({
-    id: product._id.toString(),
+    _id: product._id.toString(),
     name: product.name,
     description: product.description,
     slug: product.slug,

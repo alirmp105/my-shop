@@ -97,7 +97,7 @@ const CategoryForm = ({ mode = "create", category }) => {
         formData.append("image", data.image);
       }
 
-      const url = isEdit ? `/api/categories/${category.id}` : "/api/categories";
+      const url = isEdit ? `/api/categories/${category._id}` : "/api/categories";
 
       const method = isEdit ? "PUT" : "POST";
       

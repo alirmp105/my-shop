@@ -38,7 +38,7 @@ export async function getProducts(status) {
     .sort({ createdAt: -1 });
 
   return products.map((product) => ({
-    id: product._id.toString(),
+    _id: product._id.toString(),
     name: product.name,
     stock: product.stock,
     category: product.category?.name || "بدون دسته‌بندی",

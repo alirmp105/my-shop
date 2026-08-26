@@ -109,9 +109,9 @@ const Category = () => {
           </TableHeader>
           <TableBody>
             {categories?.map((Category) => (
-              <TableRow key={Category._id || Category.id}>
+              <TableRow key={Category._id}>
                 <TableCell className="font-medium">
-                  {Category.id.slice(20,24)}
+                  {Category._id.slice(20,24)}
                 </TableCell>
                 <TableCell>{Category.name}</TableCell>
                 <TableCell>
@@ -119,15 +119,15 @@ const Category = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   <Button asChild variant="outline">
-                    <Link href={`/admin/categories/${Category._id || Category.id}/edit`}>
+                    <Link href={`/admin/categories/${Category._id}/edit`}>
                       <PencilIcon />
                     </Link>
                   </Button>
                   <Button
                     variant="destructive"
                     className="cursor-pointer mx-3"
-                    onClick={() => handleDelete(Category._id || Category.id)}
-                    disabled={deletingId === (Category._id || Category.id)}
+                    onClick={() => handleDelete(Category._id)}
+                    disabled={deletingId === Category._id}
                   >
                     <Trash2Icon />
                   </Button>

@@ -66,7 +66,7 @@ const CouponForm = ({ mode, coupon }) => {
 
       type: coupon?.type || "percentage",
 
-      value: coupon?.value ?? "",
+      value: coupon?.value ?? "hi",
 
       minPurchase: coupon?.minPurchase ?? "",
 
@@ -87,7 +87,7 @@ const CouponForm = ({ mode, coupon }) => {
     setIsSubmitting(true);
 
     try {
-      const url = isEdit ? `/api/coupons/${coupon.id}` : "/api/coupons";
+      const url = isEdit ? `/api/coupons/${coupon._id}` : "/api/coupons";
 
       const method = isEdit ? "PUT" : "POST";
 

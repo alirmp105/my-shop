@@ -134,6 +134,7 @@ export async function POST(request) {
         product: product._id,
         quantity,
         price: product.price,
+
       });
     }
 
@@ -144,6 +145,11 @@ export async function POST(request) {
     );
 
     await cart.save();
+
+    await cart.populate({
+      path: "items.product",
+      select: "name slug price stock images",
+    });
 
     return NextResponse.json(
       {

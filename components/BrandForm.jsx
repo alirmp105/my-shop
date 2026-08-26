@@ -40,8 +40,8 @@ const BrandForm = ({ mode = "create", brand }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [imagePreview, setImagePreview] = useState(brand?.image || "");
-  
-  const schema = isEdit ? brandUpdateSchema : brandCreateSchema
+
+  const schema = isEdit ? brandUpdateSchema : brandCreateSchema;
   const form = useForm({
     resolver: zodResolver(schema),
 
@@ -55,8 +55,8 @@ const BrandForm = ({ mode = "create", brand }) => {
 
   const nameEn = form.watch("nameEn");
   // watch :
-  // این یعنی فیلد نام را بخوان 
- 
+  // این یعنی فیلد نام را بخوان
+
   useEffect(() => {
     if (!isEdit) {
       form.setValue("slug", createSlug(nameEn));
@@ -66,7 +66,6 @@ const BrandForm = ({ mode = "create", brand }) => {
   }, [nameEn, isEdit, form]);
   //[name, isEdit, form]
   // why ont obly name?
-
 
   const handleImageChange = (file, onChange) => {
     if (!file) return;
@@ -99,16 +98,15 @@ const BrandForm = ({ mode = "create", brand }) => {
         formData.append("image", data.image);
       }
 
-      const url = isEdit ? `/api/brands/${brand.id}` : "/api/brands";
+      const url = isEdit ? `/api/brands/${brand._id}` : "/api/brands";
 
       const method = isEdit ? "PUT" : "POST";
-      
+
       const res = await fetch(url, {
         method,
         body: formData,
       });
-      console.log("res" , res);
-      
+      console.log("res", res);
 
       const result = await res.json();
 
@@ -155,16 +153,12 @@ const BrandForm = ({ mode = "create", brand }) => {
         <CardContent>
           <form id="category-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
-           
-
               <Controller
                 name="nameFa"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>
-                      نام به فارسی
-                     </FieldLabel>
+                    <FieldLabel>نام به فارسی</FieldLabel>
                     <Input
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -182,17 +176,12 @@ const BrandForm = ({ mode = "create", brand }) => {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                    >
-                     نام به انگلیسی
-
-                    </FieldLabel>
+                    <FieldLabel>نام به انگلیسی</FieldLabel>
                     <Input
                       {...field}
                       aria-invalid={fieldState.invalid}
                       placeholder="نام به انگلیسی"
                       autoComplete="off"
-                      
                     />
 
                     {fieldState.invalid && (
@@ -232,16 +221,14 @@ const BrandForm = ({ mode = "create", brand }) => {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>
-                      تصویر برند
-                    :</FieldLabel>
+                    <FieldLabel>تصویر برند :</FieldLabel>
 
                     <Input
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
                       onChange={(event) => {
                         const file = event.target.files?.[0];
-      // const file = event.target.files?.[0]; ??
+                        // const file = event.target.files?.[0]; ??
                         handleImageChange(file, field.onChange);
                       }}
                     />

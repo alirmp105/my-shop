@@ -13,7 +13,7 @@ export async function generateMetadata({params}) {
  console.log("cafgdjsj : " , category);
    return {
     name : `
-   ویرایش دسته بندی با آیدی  : ${category.id}
+   ویرایش دسته بندی با آیدی  : ${category._id}
     `,
    }
 }

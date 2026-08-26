@@ -33,7 +33,7 @@ export function CartProvider({ children }) {
       const data = await fetchCart();
 
       setCart(data.cart);
-        console.log("get cart : " , data.cart);
+      console.log("get cart : ", data.cart);
     } catch (error) {
       console.error("Load cart error:", error);
 
@@ -42,7 +42,6 @@ export function CartProvider({ children }) {
       setLoading(false);
     }
   }, []);
-
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -54,29 +53,16 @@ export function CartProvider({ children }) {
       setError(null);
       setLoading(false);
     }
-    
-    
   }, [status, loadCart]);
 
-  const addToCart = async (
-    productId,
-    quantity = 1
-  ) => {
+  const addToCart = async (productId, quantity = 1) => {
     try {
       setError(null);
 
-      const data = await addToCartRequest(
-        productId,
-        quantity
-        
-        
-      );
-     
-      
-  console.log("post cart : " , data.cart);
+      const data = await addToCartRequest(productId, quantity);
+
+      console.log("post cart : ", data.cart);
       setCart(data.cart);
-    
-      
 
       return data.cart;
     } catch (error) {
@@ -88,26 +74,17 @@ export function CartProvider({ children }) {
     }
   };
 
-  const updateCartItem = async (
-    productId,
-    quantity
-  ) => {
+  const updateCartItem = async (productId, quantity) => {
     try {
       setError(null);
 
-      const data = await updateCartItemRequest(
-        productId,
-        quantity
-      );
+      const data = await updateCartItemRequest(productId, quantity);
 
       setCart(data.cart);
 
       return data.cart;
     } catch (error) {
-      console.error(
-        "Update cart item error:",
-        error
-      );
+      console.error("Update cart item error:", error);
 
       setError(error.message);
 
@@ -119,18 +96,13 @@ export function CartProvider({ children }) {
     try {
       setError(null);
 
-      const data = await removeFromCartRequest(
-        productId
-      );
-      
+      const data = await removeFromCartRequest(productId);
+
       setCart(data.cart);
 
       return data.cart;
     } catch (error) {
-      console.error(
-        "Remove from cart error:",
-        error
-      );
+      console.error("Remove from cart error:", error);
 
       setError(error.message);
 
@@ -141,73 +113,64 @@ export function CartProvider({ children }) {
   const getCartItem = useCallback(
     (productId) => {
       if (!cart?.items) return null;
-      
+
       return (
         cart.items.find((item) => {
           // Handle both populated product objects and ObjectId references
           const productRef = item.product;
-          
+
           // If product is populated (has _id property)
-          if (productRef && typeof productRef === 'object' && productRef._id) {
+          if (productRef && typeof productRef === "object" && productRef._id) {
             return productRef._id.toString() === productId;
           }
-          
+
           // If product is just an ObjectId
-          if (productRef && typeof productRef.toString === 'function') {
+          if (productRef && typeof productRef.toString === "function") {
             return productRef.toString() === productId;
           }
-          
+
           return false;
         }) ?? null
       );
     },
-    [cart]
+    [cart],
   );
 
   const getCartItemQuantity = useCallback(
     (productId) => {
       return getCartItem(productId)?.quantity ?? 0;
     },
-    [getCartItem]
+    [getCartItem],
   );
 
   const cartItemsCount =
-    cart?.items?.reduce(
-      (total, item) => total + item.quantity,
-      0
-    ) ?? 0;
+    cart?.items?.reduce((total, item) => total + item.quantity, 0) ?? 0;
 
-const value = {
-  cart,
-  loading,
-  error,
+  const value = {
+    cart,
+    loading,
+    error,
 
-  loadCart,
+    loadCart,
 
-  addToCart,
-  updateCartItem,
-  removeFromCart,
+    addToCart,
+    updateCartItem,
+    removeFromCart,
 
-  getCartItem,
-  getCartItemQuantity,
+    getCartItem,
+    getCartItemQuantity,
 
-  cartItemsCount,
-};
+    cartItemsCount,
+  };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
   const context = useContext(CartContext);
 
   if (!context) {
-    throw new Error(
-      "useCart must be used inside CartProvider"
-    );
+    throw new Error("useCart must be used inside CartProvider");
   }
 
   return context;

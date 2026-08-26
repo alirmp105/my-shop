@@ -19,7 +19,7 @@ export async function CategoriesSection () {
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {categories.map((category) => (
-            <Link key={category.id} href={`/categories/${
+            <Link key={category._id} href={`/categories/${
               category.slug}`}>
               <Card className="group overflow-hidden py-0 transition-shadow hover:shadow-md">
                 <div className="relative aspect-square overflow-hidden">
