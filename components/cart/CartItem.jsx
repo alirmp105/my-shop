@@ -170,7 +170,7 @@ export function CartItem({ item }) {
     null;
 
   return (
-    <div className="flex gap-4 border-b py-5 last:border-b-0">
+    <div className="flex gap-4 border-b py-5 px-2 sm:px-8 last:border-b-0">
       {/* Product Image */}
       <Link
         href={`/products/${product.slug}`}

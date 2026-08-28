@@ -22,18 +22,19 @@ export function CartProvider({ children }) {
   const { status } = useSession();
 
   const [cart, setCart] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  console.log("load cart start");
+  
   const loadCart = useCallback(async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       setError(null);
 
       const data = await fetchCart();
 
       setCart(data.cart);
-      console.log("get cart : ", data.cart);
+      console.log("data cart : ", data.cart);
     } catch (error) {
       console.error("Load cart error:", error);
 

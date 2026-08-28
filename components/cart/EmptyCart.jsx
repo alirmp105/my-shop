@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export function EmptyCart() {
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center gap-5 text-center">
+    <div className="container mx-auto space-y-6 py-8 flex min-h-[60vh] flex-col items-center justify-center text-center ">
       <div className="rounded-full bg-muted p-5">
         <ShoppingCart className="size-10 text-muted-foreground" />
       </div>
