@@ -14,7 +14,7 @@ import Category from '@/models/Category';
 //     id: product._id.toString(),
 //     name: product.name,
 //     stock: product.stock,
-//     category: product.category.name
+//     category: product.category.nameFa
 //   }));
 // }
 
@@ -41,7 +41,7 @@ export async function getProducts(status) {
     _id: product._id.toString(),
     name: product.name,
     stock: product.stock,
-    category: product.category?.name || "بدون دسته‌بندی",
+    category: product.category?.nameFa || product.category?.name || "بدون دسته‌بندی",
   }));
 }
 

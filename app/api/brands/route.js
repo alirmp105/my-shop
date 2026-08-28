@@ -5,31 +5,6 @@ import Brand from "@/models/Brand";
 import { brandCreateSchema } from "@/schemas/brandSchema";
 import path from "path";
 import fs from "fs/promises";
-// export async function GET() {
-//   try {
-//     await connectDB();
-//     console.log(connectDB);
-
-//     const categories = await brand.find().sort({ createdAt: -1 });
-//     console.log(categories);
-
-//     return NextResponse.json(
-//       categories.map((brand) => ({
-//         id: brand._id.toString(),
-//         name: brand.name,
-//         image : brand.image,
-
-//         // createdAt: brand.createdAt,
-//       })),
-//     );
-//   } catch (error) {
-//     console.error("error msg :", error);
-//     return NextResponse.json(
-//       { message: "failed to fetch brand" },
-//       { status: 500 },
-//     );
-//   }
-// }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -49,7 +24,7 @@ export async function POST(request) {
     // بررسی اولیه فایل
     if (!(image instanceof File)) {
       return NextResponse.json(
-        { message: "تصویر دسته بندی الزامی است" },
+        { message: "تصویر برند الزامی است" },
         { status: 400 },
       );
     }
@@ -66,7 +41,7 @@ export async function POST(request) {
     if (!allowedTypes.includes(image.type)) {
       return NextResponse.json(
         {
-          message: "فرمت یکی از تصاویر مجاز نیست.",
+          message: "فرمت تصویر برند مجاز نیست.",
         },
         { status: 400 },
       );
@@ -75,7 +50,7 @@ export async function POST(request) {
     if (image.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         {
-          message: "حجم هر تصویر نباید بیشتر از 5MB باشد.",
+          message: "حجم تصویر برند نباید بیشتر از 5MB باشد.",
         },
         { status: 400 },
       );
@@ -97,7 +72,7 @@ export async function POST(request) {
 
     if (existingbrand) {
       return NextResponse.json(
-        { message: "این دسته بندی وجود دارد" },
+        { message: "این برند وجود دارد" },
         { status: 409 },
       );
     }
@@ -133,7 +108,7 @@ export async function POST(request) {
 
     return NextResponse.json(
       {
-        message: "دسته بندی با موفقیت ایجاد شد",
+        message: "برند با موفقیت ایجاد شد",
         brand,
       },
       { status: 201 },
@@ -142,7 +117,7 @@ export async function POST(request) {
     console.error("CREATE brand ERROR:", error);
 
     return NextResponse.json(
-      { message: "خطایی در ایجاد دسته بندی رخ داد" },
+      { message: "خطایی در ایجاد برند رخ داد" },
       { status: 500 },
     );
   }

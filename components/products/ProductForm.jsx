@@ -741,7 +741,7 @@ const ProductForm = ({
                             key={category._id}
                             value={category._id}
                           >
-                            {category.name}
+                            {category.nameFa}
                           </SelectItem>
 
                         )
@@ -968,4 +968,3 @@ const ProductForm = ({
 };
 
 export default ProductForm;
-

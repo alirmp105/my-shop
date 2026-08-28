@@ -53,7 +53,6 @@ const UsersPage = async ({ searchParams }) => {
     role,
   });
   
-  //  await new Promise((resolve) => setTimeout(resolve, 3000));
    
 
   return (

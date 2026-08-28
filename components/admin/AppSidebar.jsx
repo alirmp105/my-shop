@@ -59,7 +59,7 @@ import {
 const data = {
   user: {
     name: "علی حسینی",
-    email: "sara@example.com",
+    email: "ali@example.com",
     // avatar: "/avatars/sara.jpg",
   },
   navMain: [
@@ -77,7 +77,7 @@ const data = {
         { title: "محصولات", url: "/admin/products" },
         { title: "دسته‌بندی‌ها", url: "/admin/categories" },
         { title: "کد تخفیف", url: "/admin/coupon" },
-        { title: "برند ها", url: "/admin/brands " },
+        { title: "برند ها", url: "/admin/brands" },
       ],
     },
     {
@@ -265,5 +265,4 @@ export function AppSidebar(props) {
     </Sidebar>
   )
 }
-
 

@@ -92,7 +92,7 @@ const ProductList = ({ products }) => {
               عکس اصلی
             </TableHead>
             <TableHead>دسته بندی</TableHead>
-            <TableHead className="text-right">عملیات</TableHead>
+            <TableHead >عملیات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -132,6 +132,7 @@ const ProductList = ({ products }) => {
                   height={50}
                   src={product.primaryImage}
                   alt={product.name}
+                  className="mx-auto"
                 />
                 {/* {product.image.length > 1 && (
                   <Button>
@@ -143,7 +144,7 @@ const ProductList = ({ products }) => {
               </TableCell>
               <TableCell>{product.category}</TableCell>
 
-              <TableCell className="text-right">
+              <TableCell>
                 <Button asChild variant="outline">
                   <Link href={`/admin/products/${product._id}/edit`}>
                     <PencilIcon />

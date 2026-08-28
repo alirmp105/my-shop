@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 
 const CategorySchema = new mongoose.Schema(
   {
-    name: {
+    nameFa: {
       type: String,
       required: true,
-      unique: [true, "این دسته بندی ایجاد شده است"],
+      trim: true,
+    },
+
+    nameEn: {
+      type: String,
+      required: true,
       trim: true,
     },
 
@@ -19,6 +24,11 @@ const CategorySchema = new mongoose.Schema(
     image: {
       type: String,
       required: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {

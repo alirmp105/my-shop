@@ -18,7 +18,7 @@ export async function getProducts() {
     slug: product.slug,
     price: product.price,
     stock: product.stock,
-    category: product.category?.name,
+    category: product.category?.nameFa || product.category?.name || "بدون دسته‌بندی",
     primaryImage : product.images.find((image)=>image.isPrimary)?.url || null
   }));
 }

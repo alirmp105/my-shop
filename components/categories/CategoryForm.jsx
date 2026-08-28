@@ -1,88 +1,46 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { Loader2, Save, ImagePlus, X } from "lucide-react";
+import { ImagePlus, Loader2, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
+import { Switch } from "@/components/ui/switch";
 import { categoryCreateSchema, categoryUpdateSchema } from "@/schemas/categorySchema";
 
-const createSlug = (text) => {
-  return text.trim().replace(/\s+/g, "-");
-};
+const createSlug = (text) => text.trim().replace(/\s+/g, "-");
 
 const CategoryForm = ({ mode = "create", category }) => {
   const router = useRouter();
-
   const isEdit = mode === "edit";
-
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [imagePreview, setImagePreview] = useState(category?.image || "");
-  
-  const schema = isEdit ? categoryUpdateSchema : categoryCreateSchema
-  const form = useForm({
-    resolver: zodResolver(schema),
 
+  const form = useForm({
+    resolver: zodResolver(isEdit ? categoryUpdateSchema : categoryCreateSchema),
     defaultValues: {
-      name: category?.name ?? "",
+      nameFa: category?.nameFa ?? "",
+      nameEn: category?.nameEn ?? "",
       slug: category?.slug ?? "",
       image: undefined,
+      isActive: category?.isActive ?? true,
     },
   });
 
-  const name = form.watch("name");
-  // watch :
-  // این یعنی فیلد نام را بخوان 
- 
+  const nameEn = form.watch("nameEn");
+
   useEffect(() => {
     if (!isEdit) {
-      form.setValue("slug", createSlug(name));
-      //setValue("slug", createSlug(name))
-      // بر اساس اسناد دو ورودی میگیرد که ورودی اول اسم فیلد مد نظر است
+      form.setValue("slug", createSlug(nameEn || ""));
     }
-  }, [name, isEdit, form]);
-  //[name, isEdit, form]
-  // why ont obly name?
-
-
-  const handleImageChange = (file, onChange) => {
-    if (!file) return;
-
-    onChange(file);
-
-    const previewUrl = URL.createObjectURL(file);
-    // ??
-
-    setImagePreview(previewUrl);
-  };
-
-  // حذف preview
-  const removeImage = (onChange) => {
-    onChange(undefined);
-    setImagePreview("");
-  };
+  }, [form, isEdit, nameEn]);
 
   const onSubmit = async (data) => {
     setServerError("");
@@ -90,51 +48,32 @@ const CategoryForm = ({ mode = "create", category }) => {
 
     try {
       const formData = new FormData();
-
-      formData.append("name", data.name);
-      formData.append("slug", data.slug);
+      formData.append("nameFa", data.nameFa);
+      formData.append("nameEn", data.nameEn);
+      formData.append("isActive", String(data.isActive));
       if (data.image instanceof File) {
         formData.append("image", data.image);
       }
 
       const url = isEdit ? `/api/categories/${category._id}` : "/api/categories";
-
-      const method = isEdit ? "PUT" : "POST";
-      
-      const res = await fetch(url, {
-        method,
+      const response = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
         body: formData,
       });
-      console.log("res" , res);
-      
+      const result = await response.json();
 
-      const result = await res.json();
-
-      if (!res.ok) {
-        setServerError(
-          result.message || "خطایی رخ داد، لطفاً دوباره تلاش کنید",
-        );
-
+      if (!response.ok) {
+        setServerError(result.message || "خطایی رخ داد، لطفاً دوباره تلاش کنید");
         return;
       }
 
-      if (res.status === 201) {
-        toast.success("دسته بندی ایجاد شد", {
-          position: "top-center",
-        });
-      }
-
-      if (res.status === 200) {
-        toast.success("دسته بندی ویرایش شد", {
-          position: "top-center",
-        });
-      }
-
+      toast.success(isEdit ? "دسته بندی ویرایش شد" : "دسته بندی ایجاد شد", {
+        position: "top-center",
+      });
       router.push("/admin/categories");
       router.refresh();
     } catch (error) {
       console.error(error);
-
       setServerError("ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید");
     } finally {
       setIsSubmitting(false);
@@ -142,147 +81,123 @@ const CategoryForm = ({ mode = "create", category }) => {
   };
 
   return (
-    <div>
-      <Card className="w-full sm:max-w-md mx-auto mt-4">
-        <CardHeader>
-          <CardTitle className="text-center">
-            {isEdit ? "ویرایش دسته بندی" : "دسته بندی جدید"}
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent>
-          <form id="category-form" onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup>
-           
-
-              <Controller
-                name="name"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>نام دسته بندی :</FieldLabel>
-                    <Input
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                      placeholder="مثلاً مبل "
-                      autoComplete="off"
-                    />
-
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {/* slug */}
-
-              <Controller
-                name="slug"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Slug :</FieldLabel>
-
-                    <Input
-                      {...field}
-                      readOnly
-                      dir="rtl"
-                      className="text-left"
-                    />
-
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {/* img */}
-
-              <Controller
-                name="image"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>تصویر دسته بندی :</FieldLabel>
-
-                    <Input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-      // const file = event.target.files?.[0]; ??
-                        handleImageChange(file, field.onChange);
-                      }}
-                    />
-
-                    {imagePreview && (
-                      <div className="relative mt-3">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-48 object-cover rounded-md"
-                        />
-
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="destructive"
-                          className="absolute top-2 right-2"
-                          onClick={() => removeImage(field.onChange)}
-                        >
-                          <X />
-                        </Button>
-                      </div>
-                    )}
-
-                    {!imagePreview && (
-                      <div className="flex items-center justify-center h-32 border border-dashed rounded-md">
-                        <ImagePlus className="mr-2" />
-                        <span>تصویری انتخاب نشده</span>
-                      </div>
-                    )}
-
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {/* SERVER ERROR */}
-
-              {serverError && (
-                <p className="text-sm text-destructive">{serverError}</p>
+    <Card className="w-full sm:max-w-md mx-auto mt-4">
+      <CardHeader>
+        <CardTitle className="text-center">
+          {isEdit ? "ویرایش دسته بندی" : "دسته بندی جدید"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form id="category-form" onSubmit={form.handleSubmit(onSubmit)}>
+          <FieldGroup>
+            <Controller
+              name="nameFa"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>نام به فارسی</FieldLabel>
+                  <Input {...field} aria-invalid={fieldState.invalid} />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
               )}
-            </FieldGroup>
-          </form>
-        </CardContent>
-
-        <CardFooter>
-          <Field orientation="horizontal">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                form.reset();
-                setImagePreview(category?.image || "");
-                setServerError("");
-              }}
-            >
-              Reset
-            </Button>
-
-            <Button type="submit" form="category-form" disabled={isSubmitting}>
-              {isSubmitting ? <Loader2 className="animate-spin" /> : <Save />}
-
-              {isEdit ? "ذخیره تغییرات" : "ایجاد دسته بندی"}
-            </Button>
-          </Field>
-        </CardFooter>
-      </Card>
-    </div>
+            />
+            <Controller
+              name="nameEn"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>نام به انگلیسی</FieldLabel>
+                  <Input {...field} aria-invalid={fieldState.invalid} dir="ltr" />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+            <Controller
+              name="slug"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>Slug</FieldLabel>
+                  <Input {...field} readOnly dir="ltr" className="text-left" />
+                </Field>
+              )}
+            />
+            <Controller
+              name="isActive"
+              control={form.control}
+              render={({ field }) => (
+                <Field orientation="horizontal">
+                  <FieldLabel>فعال</FieldLabel>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </Field>
+              )}
+            />
+            <Controller
+              name="image"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>تصویر دسته بندی</FieldLabel>
+                  <Input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      field.onChange(file);
+                      setImagePreview(URL.createObjectURL(file));
+                    }}
+                  />
+                  {imagePreview ? (
+                    <div className="relative mt-3">
+                      <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-md" />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          field.onChange(undefined);
+                          setImagePreview(isEdit ? category?.image || "" : "");
+                        }}
+                      >
+                        <X />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-32 border border-dashed rounded-md">
+                      <ImagePlus className="mr-2" />
+                      <span>تصویری انتخاب نشده</span>
+                    </div>
+                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+            {serverError && <p className="text-sm text-destructive">{serverError}</p>}
+          </FieldGroup>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Field orientation="horizontal">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              form.reset();
+              setImagePreview(category?.image || "");
+              setServerError("");
+            }}
+          >
+            بازنشانی
+          </Button>
+          <Button type="submit" form="category-form" disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="animate-spin" /> : <Save />}
+            {isEdit ? "ذخیره تغییرات" : "ایجاد دسته بندی"}
+          </Button>
+        </Field>
+      </CardFooter>
+    </Card>
   );
 };
 

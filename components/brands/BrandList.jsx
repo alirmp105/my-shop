@@ -65,7 +65,7 @@ const BrandList = ({ brands }) => {
             <TableHead>نام برند</TableHead>
             <TableHead>تصویر</TableHead>
 
-            <TableHead className="text-right">عملیات</TableHead>
+            <TableHead >عملیات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,10 +81,11 @@ const BrandList = ({ brands }) => {
                   alt={brand.nameFa}
                   width={40}
                   height={40}
+                  className="mx-auto"
                 />
               
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 <Button asChild variant="outline">
                   <Link href={`/admin/brands/${brand._id || brand._id}/edit`}>
                     <PencilIcon />

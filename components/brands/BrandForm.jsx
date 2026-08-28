@@ -283,7 +283,7 @@ const BrandForm = ({ mode = "create", brand }) => {
               variant="outline"
               onClick={() => {
                 form.reset();
-                setImagePreview(category?.image || "");
+                setImagePreview(brand?.image || "");
                 setServerError("");
               }}
             >

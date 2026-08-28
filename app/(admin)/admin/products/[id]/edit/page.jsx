@@ -7,10 +7,6 @@ import Category from "@/models/Category";
 import ProductForm from "@/components/products/ProductForm";
 
 
-// ---------------------------------------------
-// دریافت یک محصول
-// ---------------------------------------------
-
 async function getProduct(id) {
   await connectDB();
 
@@ -38,7 +34,8 @@ async function getProduct(id) {
     category: product.category
       ? {
           _id: product.category._id.toString(),
-          name: product.category.name,
+          nameFa: product.category.nameFa || product.category.name || "",
+          nameEn: product.category.nameEn || "",
         }
       : null,
 
@@ -50,27 +47,20 @@ async function getProduct(id) {
 }
 
 
-// ---------------------------------------------
-// دریافت دسته‌بندی‌ها
-// ---------------------------------------------
-
 async function getCategories() {
   await connectDB();
 
   const categories = await Category.find()
-    .select("_id name")
+    .select("_id nameFa nameEn name")
     .lean();
 
   return categories.map((category) => ({
     _id: category._id.toString(),
-    name: category.name,
+    nameFa: category.nameFa || category.name || "",
+    nameEn: category.nameEn || "",
   }));
 }
 
-
-// ---------------------------------------------
-// Page
-// ---------------------------------------------
 
 const EditProductPage = async ({ params }) => {
 
@@ -113,4 +103,3 @@ const EditProductPage = async ({ params }) => {
 };
 
 export default EditProductPage;
-

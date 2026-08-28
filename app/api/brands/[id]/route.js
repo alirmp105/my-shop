@@ -11,36 +11,6 @@ function isValidId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
-// export async function GET(request, { params }) {
-//   const { id } = await params;
-//   console.log(params);
-//   console.log(id);
-
-//   try {
-//     await connectDB();
-
-//     const brand = await brand.findById(id).lean();
-
-//     if (!brand) {
-//       console.error("error : ", error);
-//       return NextResponse.json(
-//         { message: "brand was not found " },
-//         { status: 404 },
-//       );
-//     }
-
-//     return NextResponse.json({
-//       id: brand._id.toString(),
-//       name: brand.name,
-//     });
-//   } catch (error) {
-//     console.error("error", error);
-//     return NextResponse.json(
-//       { message: "failed to fetch brand " },
-//       { status: 500 },
-//     );
-//   }
-// }
 
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -55,7 +25,7 @@ export async function PUT(request, { params }) {
     // بررسی معتبر بودن ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { message: "شناسه دسته بندی معتبر نیست" },
+        { message: "شناسه برند معتبر نیست" },
         { status: 400 },
       );
     }
@@ -65,7 +35,7 @@ export async function PUT(request, { params }) {
 
     if (!brand) {
       return NextResponse.json(
-        { message: "دسته بندی پیدا نشد" },
+        { message: "برند پیدا نشد" },
         { status: 404 },
       );
     }
@@ -110,7 +80,7 @@ export async function PUT(request, { params }) {
     if (existingbrand) {
       return NextResponse.json(
         {
-          message: "دسته بندی با این نام یا slug قبلاً ایجاد شده است",
+          message: "برند با این نام یا slug قبلاً ایجاد شده است",
         },
         { status: 409 },
       );
@@ -141,12 +111,7 @@ export async function PUT(request, { params }) {
         );
       }
 
-      const uploadDir = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "categories",
-      );
+      const uploadDir =       path.join(process.cwd(), "public", "uploads", "brands");
 
       await fs.mkdir(uploadDir, {
         recursive: true,
@@ -164,10 +129,11 @@ export async function PUT(request, { params }) {
 
       await fs.writeFile(newFilePath, buffer);
 
-      imageUrl = `/uploads/categories/${fileName}`;
+      imageUrl = `/uploads/brands/${fileName}`;
     }
 
     // آپدیت MongoDB
+    const oldImageUrl = brand.image;
     brand.nameFa = nameFa.trim();
     brand.nameEn = nameEn.trim();
     brand.slug = slug.trim();
@@ -175,7 +141,6 @@ export async function PUT(request, { params }) {
 
     await brand.save();
 
-    const oldImageUrl = brand.image;
     // اگر عکس جدید ذخیره شد،
     // عکس قبلی را حذف کن
     if (newImage && oldImageUrl) {
@@ -192,24 +157,18 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json(
       {
-        message: "دسته بندی با موفقیت ویرایش شد",
+        message: "برند با موفقیت ویرایش شد",
         brand,
       },
       { status: 200 },
     );
   } catch (error) {
-    // if (newFilePath) {
-    //   try {
-    //     await fs.unlink(newFilePath);
-    //   } catch (deleteError) {
-    //     console.error(deleteError);
-    //   }
-    // }
+   
     console.error("UPDATE brand ERROR:", error);
 
     return NextResponse.json(
       {
-        message: "خطایی در ویرایش دسته بندی رخ داد",
+        message: "خطایی در ویرایش برند رخ داد",
       },
       { status: 500 },
     );
@@ -223,7 +182,7 @@ export async function DELETE(request, { params }) {
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { message: "شناسه دسته بندی معتبر نیست" },
+        { message: "شناسه برند معتبر نیست" },
         { status: 400 },
       );
     }
@@ -233,7 +192,7 @@ export async function DELETE(request, { params }) {
 
     if (!brand) {
       return NextResponse.json(
-        { message: "دسته بندی پیدا نشد" },
+        { message: "برند پیدا نشد" },
         { status: 404 },
       );
     }
@@ -260,12 +219,12 @@ export async function DELETE(request, { params }) {
   
 
     return NextResponse.json(
-      { message: "دسته بندی  با موفقیت حذف شد" },
+      { message: "برند با موفقیت حذف شد" },
       { status: 200 },
     );
   } catch (error) {
     return NextResponse.json(
-      { message: "خطایی در حذف دسته بندی رخ داد" },
+      { message: "خطایی در حذف برند رخ داد" },
       { status: 500 },
     );
   }

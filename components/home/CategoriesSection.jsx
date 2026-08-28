@@ -25,14 +25,14 @@ export async function CategoriesSection () {
                 <div className="relative aspect-square overflow-hidden">
                   <Image
                     src={category.image}
-                    alt={category.name}
+                    alt={category.nameFa}
                     fill
                     sizes="(min-width: 1024px) 16vw, 33vw"
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/30 transition-colors group-hover:bg-black/40" />
                   <span className="absolute inset-x-0 bottom-3 text-center text-sm font-semibold text-white">
-                    {category.name}
+                    {category.nameFa}
                   </span>
                 </div>
               </Card>

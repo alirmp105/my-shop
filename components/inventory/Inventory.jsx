@@ -56,7 +56,7 @@ const Inventory = ({ products }) => {
     <div>
       {error && <GeneralError error={error} />}
       <Select value={status} onValueChange={handleStatusChange}>
-        <SelectTrigger className="">
+        <SelectTrigger >
           <SelectValue placeholder="وضعیت موجودی" />
         </SelectTrigger>
 
@@ -86,7 +86,7 @@ const Inventory = ({ products }) => {
               <TableCell className="font-medium">
                 {product._id.slice(20, 24)}
               </TableCell>
-              <TableCell className="line-clamp-1">{product.name}</TableCell>
+              <TableCell className="truncate max-w-1">{product.name}</TableCell>
              
              
               <TableCell>
@@ -95,7 +95,7 @@ const Inventory = ({ products }) => {
 
               <TableCell>{product.category}</TableCell>
 
-              <TableCell className="text-right">
+              <TableCell>
                 <InventoryEditDialog product={product}  />
               </TableCell>
             </TableRow>

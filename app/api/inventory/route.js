@@ -4,29 +4,7 @@ import Product from "@/models/Product";
 // import { productSchema } from "@/schemas/ProductSchema";
 import Category from "@/models/Category";
 // app/api/products/route.js
-import mongoose from "mongoose";
-// export async function GET() {
-//   try {
-//     await connectDB();
 
-//     const products = await Product.find().populate("category");
-
-//     return NextResponse.json(
-//       products.map((product) => ({
-//         id: product._id.toString(),
-//         name: product.name,
-//         stock: product.stock,
-//         category: product.category.name,
-//       })),
-//     );
-//   } catch (error) {
-//     console.error("error msg :", error);
-//     return NextResponse.json(
-//       { message: "failed to fetch products" },
-//       { status: 500 },
-//     );
-//   }
-// }
 
 
 export async function GET(req) {

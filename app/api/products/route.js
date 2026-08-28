@@ -22,7 +22,7 @@ export async function GET() {
         price: product.price,
         stock: product.stock,
         image: product.image,
-        category: product.category.name,
+        category: product.category?.nameFa || product.category?.name || "بدون دسته‌بندی",
       })),
     );
   } catch (error) {
@@ -50,10 +50,6 @@ import crypto from "crypto";
 
 
 
-// ==================================================
-// تنظیمات آپلود
-// ==================================================
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const allowedTypes = [
@@ -62,10 +58,6 @@ const allowedTypes = [
   "image/webp",
 ];
 
-
-// ==================================================
-// POST
-// ==================================================
 
 
 
@@ -76,9 +68,6 @@ export async function POST(req) {
     await connectDB();
 
 
-    // ==========================================
-    // FormData
-    // ==========================================
 
     const formData = await req.formData();
 
@@ -562,4 +551,3 @@ console.log(
     );
   }
 }
-

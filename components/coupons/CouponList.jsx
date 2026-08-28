@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pen, PlusIcon, Trash2 } from "lucide-react";
+import { Pencil, PlusIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns-jalali";
 const CouponList = ({ coupons }) => {
@@ -68,9 +68,9 @@ const CouponList = ({ coupons }) => {
               <TableCell>{formatExpireDate(coupon.expiresAt)}</TableCell>
               <TableCell>{`${coupon.isActive ? "فعال" : "غیرفعال"}`}</TableCell>
               <TableCell>
-                <Button asChild className="mx-2">
+                <Button asChild className="mx-2 border" variant="outline">
                   <Link href={`/admin/coupon/${coupon.id}/edit`}>
-                    <Pen />
+                    <Pencil  />
                   </Link>
                 </Button>
                 <Button variant="destructive">

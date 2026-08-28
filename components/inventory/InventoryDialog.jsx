@@ -44,30 +44,6 @@ const InventoryEditDialog = ({ product }) => {
     }
   }, [open]);
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-
-  //   if (!quantity || changeAmount <= 0) {
-  //     return;
-  //   }
-
-  //   if (isInvalidDecrease) {
-  //     return;
-  //   }
-
-  //   console.log({
-  //     productId: product.id,
-  //     type,
-  //     quantity: changeAmount,
-  //     currentStock,
-  //     newStock,
-  //   });
-
-  //   // فعلاً فقط UI
-  //   // بعداً اینجا PATCH API را اضافه می‌کنیم
-
-  //   setOpen(false);
-  // };
 const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -131,9 +107,9 @@ const handleSubmit = async (e) => {
   }
 };
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+    <Dialog open={open} onOpenChange={setOpen} >
+      <DialogTrigger asChild >
+        <Button variant="outline" size="sm" >
           ویرایش موجودی
         </Button>
       </DialogTrigger>

@@ -10,8 +10,7 @@ function isValidId(id) {
 
 export async function PUT(request, { params }) {
   const { id } = await params;
-//   console.log("id : ", id);
-//   console.log("params : ", params);
+
 
   if (!isValidId(id)) {
     return NextResponse.json(
