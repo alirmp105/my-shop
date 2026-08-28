@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect } from "react";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 const GeneralError = ({ error, onRetry = null }) => {
   useEffect(() => {

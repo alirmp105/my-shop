@@ -1,4 +1,4 @@
-import ProductList from "@/components/ProductList";
+import ProductList from "@/components/products/ProductList";
 import React from "react";
 
 import { connectDB } from "@/lib/mongodb";

@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/admin/AppSidebar"
 import { Home } from "lucide-react"
 import Link from "next/link"
 import { TooltipProvider } from "@/components/ui/tooltip"

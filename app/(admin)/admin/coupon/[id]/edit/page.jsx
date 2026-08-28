@@ -1,4 +1,4 @@
-import CouponForm from '@/components/CouponForm';
+import CouponForm from '@/components/coupons/CouponForm';
 import { connectDB } from '@/lib/mongodb';
 import Coupon from '@/models/Coupon';
 import React from 'react';

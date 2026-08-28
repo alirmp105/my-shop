@@ -1,4 +1,4 @@
-import CouponList from '@/components/CouponList';
+import CouponList from '@/components/coupons/CouponList';
 import { connectDB } from '@/lib/mongodb';
 import Coupon from '@/models/Coupon';
 import React from 'react';

@@ -1,4 +1,4 @@
-import BrandList from '@/components/BrandList';
+import BrandList from '@/components/brands/BrandList';
 import { getBrands } from '@/lib/data/brands';
 import React from 'react';
 

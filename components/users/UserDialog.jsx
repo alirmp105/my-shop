@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Eye } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 const UserDialog = ({user}) => {
      const [open, setOpen] = useState(false);
     return (

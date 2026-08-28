@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import GeneralError from "@/components/GeneralError";
+import GeneralError from "@/components/shared/GeneralError";
 import Link from "next/link";
 import { toast } from "sonner";
 import { PlusIcon } from "lucide-react";

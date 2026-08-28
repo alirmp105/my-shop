@@ -19,9 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import React from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Eye, Pen } from "lucide-react";
-import UserDialog from "./UserDialog";
+import UserDialog from "@/components/users/UserDialog";
 
 const UserList = ({ users }) => {
   const router = useRouter();

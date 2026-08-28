@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import GeneralError from "@/components/GeneralError";
+import GeneralError from "@/components/shared/GeneralError";
 
 
 
@@ -23,8 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import StockStatus from "./StockStatus";
-import InventoryEditDialog from "./InventoryDialog";
+import StockStatus from "@/components/inventory/StockStatus";
+import InventoryEditDialog from "@/components/inventory/InventoryDialog";
 
 const Inventory = ({ products }) => {
   const [error, setError] = useState(null);

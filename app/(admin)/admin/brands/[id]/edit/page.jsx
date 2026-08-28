@@ -1,4 +1,4 @@
-import BrandForm from "@/components/BrandForm";
+import BrandForm from "@/components/brands/BrandForm";
 import { getBrand } from "@/lib/data/brands";
 const EditBrand =async ({params}) => {
     const {id} = await params;

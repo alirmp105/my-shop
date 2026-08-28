@@ -1,5 +1,5 @@
 "use client"
-import GeneralError from "@/components/GeneralError";
+import GeneralError from "@/components/shared/GeneralError";
 
 const error = ({error,reset}) => {
     return (

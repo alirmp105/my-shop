@@ -1,7 +1,7 @@
 import React from 'react';
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
-import Inventory from '@/components/Inventory';
+import Inventory from '@/components/inventory/Inventory';
 import Category from '@/models/Category';
 
 

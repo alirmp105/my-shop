@@ -1,4 +1,4 @@
-import UserList from "@/components/UserList";
+import UserList from "@/components/users/UserList";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import { EyeClosed, EyeIcon } from "lucide-react";

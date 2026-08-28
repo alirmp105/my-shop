@@ -1,4 +1,4 @@
-import CouponForm from '@/components/CouponForm';
+import CouponForm from '@/components/coupons/CouponForm';
 import React from 'react';
 
 const AddCoupon = () => {

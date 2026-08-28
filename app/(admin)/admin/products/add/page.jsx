@@ -1,4 +1,4 @@
-import ProductForm from "@/components/ProductForm";
+import ProductForm from "@/components/products/ProductForm";
 import { cachedCategoreis } from "@/lib/data/categories";
 
 

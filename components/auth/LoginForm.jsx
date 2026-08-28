@@ -238,9 +238,9 @@ import Link from "next/link";
 import { Mail, AlertCircle } from "lucide-react";
 
 import Input from "@/components/ui/InputTest";
-import PasswordInput from "@/components/PasswordInput";
+import PasswordInput from "@/components/auth/PasswordInput";
 import {Button} from "@/components/ui/button";
-import BrandPanel from "@/components/BrandPanel";
+import BrandPanel from "@/components/auth/BrandPanel";
 import { loginSchema } from "@/schemas/auth";
 
 export default function LoginPage() {

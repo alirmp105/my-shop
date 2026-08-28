@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import GeneralError from "@/components/GeneralError";
+import GeneralError from "@/components/shared/GeneralError";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";

@@ -1,4 +1,4 @@
-import BrandForm from '@/components/BrandForm';
+import BrandForm from '@/components/brands/BrandForm';
 import React from 'react';
 
 const AddBrand = () => {

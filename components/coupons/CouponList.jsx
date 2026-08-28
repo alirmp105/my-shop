@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Pen, PlusIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns-jalali";
