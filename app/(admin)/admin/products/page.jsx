@@ -1,31 +1,11 @@
 import ProductList from "@/components/products/ProductList";
+import { getProducts } from "@/lib/data/products";
 import React from "react";
 
-import { connectDB } from "@/lib/mongodb";
-import Product from "@/models/Product";
-import Category from "@/models/Category";
-
-
-export async function getProducts() {
-  await connectDB();
-
-  const products = await Product.find().populate("category");
-
-  return products.map((product) => ({
-    _id: product._id.toString(),
-    name: product.name,
-    description: product.description,
-    slug: product.slug,
-    price: product.price,
-    stock: product.stock,
-    category: product.category?.nameFa || product.category?.name || "بدون دسته‌بندی",
-    primaryImage : product.images.find((image)=>image.isPrimary)?.url || null
-  }));
-}
 
 const ProductPage = async () => {
   const products = await getProducts();
-  console.log(products);
+
 
   return (
     <div>

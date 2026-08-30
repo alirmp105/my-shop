@@ -5,19 +5,6 @@ import Inventory from '@/components/inventory/Inventory';
 import Category from '@/models/Category';
 
 
-// export async function getProducts() {
-//   await connectDB();
-
-//   const products = await Product.find().lean().populate("category");
-
-//   return products.map((product) => ({
-//     id: product._id.toString(),
-//     name: product.name,
-//     stock: product.stock,
-//     category: product.category.nameFa
-//   }));
-// }
-
 
 
 export async function getProducts(status) {

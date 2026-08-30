@@ -54,12 +54,60 @@ export async function PUT(request, { params }) {
         message : " coupon updated "
 
     }, {status : 200})
-    console.log("couopn :::" , coupon);
+
     
 
 
   } catch (error) {
      console.error("Update post error:", error);
         return NextResponse.json({ message: "Failed to update coupon" }, { status: 500 });
+  }
+}
+
+
+export async function DELETE(request, { params }) {
+  try {
+    await connectDB();
+
+    const { id } = await params;
+    console.log("couopon id from backend :  ", id);
+    
+    // if (isValidId(id)) {
+    //   return NextResponse.json(
+    //     { message: "شناسه کد تخفیف معتبر نیست" },
+    //     { status: 400 },
+    //   );
+    // }
+     if (!mongoose.Types.ObjectId.isValid(id)) {
+          return NextResponse.json({ message: "شناسه دسته بندی معتبر نیست" }, { status: 400 });
+        }
+
+    // پیدا کردن brand
+    const coupon = await Coupon.findById(id);
+
+    if (!coupon) {
+      return NextResponse.json(
+        { message: "برند پیدا نشد" },
+        { status: 404 },
+      );
+    }
+
+    
+    await Coupon.findByIdAndDelete(id);
+
+    //حذف فایل تصویر
+
+    ``
+  
+
+    return NextResponse.json(
+      { message: "کد تخفیف با موفقیت حذف شد" },
+      { status: 200 },
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: "خطایی در حذف کد تخفیف رخ داد" },
+      { status: 500 },
+    );
   }
 }

@@ -10,7 +10,6 @@ import { getBrands } from "@/lib/data/brands";
 
 export async function BrandsSlider() {
   const brands = await getBrands();
-  console.log("brands : " , brands);
   
   return (
     <section className="border-y bg-muted/30 py-14">

@@ -1,4 +1,5 @@
-import React from "react";
+"use client"
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,10 +9,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { Pencil, PlusIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns-jalali";
+// import { format } from "date-fns-jalali";
+import { useRouter } from "next/navigation";
 const CouponList = ({ coupons }) => {
+
+
+  const[error,setError] = useState(null)
+  const[deletingId,setDeletingId] = useState(null)
+  const router = useRouter()
   const formatExpireDate = (date) => {
     if (!date) return "بدون انقضا";
 
@@ -27,6 +35,28 @@ const CouponList = ({ coupons }) => {
       day: "2-digit",
     }).format(parsedDate);
   };
+
+    const handleDelete = async (id) => {
+      setError("");
+      setDeletingId(id);
+  
+      try {
+        const res = await fetch(`/api/coupons/${id}`, { method: "DELETE" });
+  
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || "Failed to delete coupon");
+        }
+  
+        toast.success("کد تخفیف حذف شد", { position: "top-center" });
+        router.refresh();
+      } catch (error) {
+        setError("error from client ", error.message);
+      } finally {
+        setDeletingId(null);
+      }
+    };
+  
   return (
     <div>
       <Link
@@ -55,7 +85,7 @@ const CouponList = ({ coupons }) => {
         </TableHeader>
         <TableBody>
           {coupons?.map((coupon) => (
-            <TableRow key={coupon.id}>
+            <TableRow key={coupon._id}>
               <TableCell>{coupon.code}</TableCell>
               <TableCell>
                 {` ${coupon.type === "percentage" ? "درصدی" : "مبلغ ثابت"}`}
@@ -69,11 +99,14 @@ const CouponList = ({ coupons }) => {
               <TableCell>{`${coupon.isActive ? "فعال" : "غیرفعال"}`}</TableCell>
               <TableCell>
                 <Button asChild className="mx-2 border" variant="outline">
-                  <Link href={`/admin/coupon/${coupon.id}/edit`}>
+                  <Link href={`/admin/coupon/${coupon._id}/edit`}>
                     <Pencil  />
                   </Link>
                 </Button>
-                <Button variant="destructive">
+                <Button variant="destructive" 
+              onClick={() => handleDelete(coupon._id)}
+                  disabled={deletingId === (coupon._id)}
+                >
                   <Trash2 />
                 </Button>
               </TableCell>
