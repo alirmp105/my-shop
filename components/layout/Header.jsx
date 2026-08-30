@@ -91,7 +91,7 @@ export function Header() {
             <Link href="/cart">
               <ShoppingCart />
             {itemCount > 0 && (
-              <span className="absolute -top-1 -end-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              <span className="absolute -top-1  flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {itemCount}
               </span>
             )}

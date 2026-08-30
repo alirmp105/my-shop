@@ -1,9 +1,9 @@
 import ProductForm from "@/components/products/ProductForm";
-import { cachedCategoreis } from "@/lib/data/categories";
+import {getCategories } from "@/lib/data/categories";
 
 
 const AddProduct = async () => {
-  const categories = await cachedCategoreis();
+  const categories = await getCategories();
   
   return (
     <div>

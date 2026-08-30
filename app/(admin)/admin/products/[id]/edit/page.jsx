@@ -4,7 +4,7 @@ import Product from "@/models/Product";
 import Category from "@/models/Category";
 
 import ProductForm from "@/components/products/ProductForm";
-import { cachedCategoreis } from "@/lib/data/categories";
+import {getCategories } from "@/lib/data/categories";
 import { getProduct } from "@/lib/data/products";
 
 
@@ -16,7 +16,7 @@ const EditProductPage = async ({ params }) => {
   const [product, categories] =
     await Promise.all([
       await getProduct(id),
-      await cachedCategoreis(),
+      await getCategories(),
     ]);
 
     console.log(product);

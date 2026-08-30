@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
     const product = await Product.findById(id).lean();
 
     if (!product) {
-      console.error("error : ", error);
+      console.error("Product not found for id:", id);
       return NextResponse.json(
         { message: "product was not found " },
         { status: 404 },

@@ -195,6 +195,7 @@ console.log(
       await Category.findById(
         data.category
       );
+      
 
 
     if (!categoryExists) {
