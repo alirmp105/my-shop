@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, Search, ShoppingBag, ShoppingCart, User } from "lucide-react";
 
-import { mainNav } from "@/data/nav";
+import { mainNav } from "@/lib/nav";
 import { useCart } from "@/lib/cart-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

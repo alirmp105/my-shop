@@ -1,8 +1,8 @@
 import CategoryList from "@/components/categories/CategoryList";
-import { getCategories } from "@/lib/data/categories";
+import { cachedCategoreis, getCategories } from "@/lib/data/categories";
 
 const CategoriesPage = async () => {
-  const categories = await getCategories();
+  const categories = await cachedCategoreis();
   return <CategoryList categories={categories} />;
 };
 

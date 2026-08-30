@@ -101,7 +101,7 @@ const ProductList = ({ products }) => {
               <TableCell className="font-medium">
                 {product._id.slice(20, 24)}
               </TableCell>
-              <TableCell className="line-clamp-1">{product.name}</TableCell>
+              <TableCell className="truncate max-w-3">{product.name}</TableCell>
               <TableCell>
                 <Dialog>
                   <DialogTrigger asChild>

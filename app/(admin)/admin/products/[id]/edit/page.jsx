@@ -1,65 +1,12 @@
 import React from "react";
 
-import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
 
 import ProductForm from "@/components/products/ProductForm";
+import { cachedCategoreis } from "@/lib/data/categories";
+import { getProduct } from "@/lib/data/products";
 
-
-async function getProduct(id) {
-  await connectDB();
-
-  const product = await Product.findById(id)
-    .populate("category")
-    .lean();
-
-  if (!product) {
-    return null;
-  }
-
-  return {
-    _id: product._id.toString(),
-
-    name: product.name,
-
-    description: product.description,
-
-    slug: product.slug,
-
-    price: product.price,
-
-    stock: product.stock,
-
-    category: product.category
-      ? {
-          _id: product.category._id.toString(),
-          nameFa: product.category.nameFa || product.category.name || "",
-          nameEn: product.category.nameEn || "",
-        }
-      : null,
-
-    images: product.images.map((image) => ({
-      url: image.url,
-      isPrimary: image.isPrimary,
-    })),
-  };
-}
-
-
-async function getCategories() {
-  await connectDB();
-
-  const categories = await Category.find()
-    .select("_id nameFa nameEn name")
-    .lean();
-
-  return categories.map((category) => ({
-    _id: category._id.toString(),
-    nameFa: category.nameFa || category.name || "",
-    nameEn: category.nameEn || "",
-  }));
-}
 
 
 const EditProductPage = async ({ params }) => {
@@ -68,8 +15,8 @@ const EditProductPage = async ({ params }) => {
 
   const [product, categories] =
     await Promise.all([
-      getProduct(id),
-      getCategories(),
+      await getProduct(id),
+      await cachedCategoreis(),
     ]);
 
     console.log(product);
