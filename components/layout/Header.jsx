@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, Search, ShoppingBag, ShoppingCart, User } from "lucide-react";
@@ -8,11 +7,22 @@ import { mainNav } from "@/lib/nav";
 import { useCart } from "@/lib/cart-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useSession } from "next-auth/react";
+import UserMenu from "@/app/(auth)/user/UserMenu";
+import UserSkeleton from "@/app/(auth)/user/UserSkeleton";
+import CartCountSkeleton from "../cart/CartCountSkeleton";
 
 export function Header() {
-  const { cartItemsCount } = useCart();
+  const { cartItemsCount, loading } = useCart();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
@@ -75,7 +85,11 @@ export function Header() {
                 onBlur={() => setSearchOpen(false)}
               />
             ) : (
-              <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSearchOpen(true)}
+              >
                 <Search />
                 <span className="sr-only">جستجو</span>
               </Button>
@@ -87,27 +101,31 @@ export function Header() {
           </Button>
 
           {/* Cart */}
-          <Button variant="ghost" size="icon" className="relative" asChild>
-            <Link href="/cart">
-              <ShoppingCart />
-            {cartItemsCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                {cartItemsCount}
-              </span>
-            )}
-            <span className="sr-only">سبد خرید</span>
-            </Link>
-          </Button>
 
-          {/* Auth */}
-          <Button variant="outline" size="sm" className="hidden sm:inline-flex">
-            <User />
-            ورود / ثبت‌نام
-          </Button>
-          <Button variant="ghost" size="icon" className="sm:hidden">
-            <User />
-            <span className="sr-only">ورود / ثبت‌نام</span>
-          </Button>
+          {loading ? (
+            <CartCountSkeleton />
+          ) : (
+            <Button variant="ghost" size="icon" className="relative" asChild>
+              <Link href="/cart">
+                <ShoppingCart />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {cartItemsCount}
+                  </span>
+                )}
+                <span className="sr-only">سبد خرید</span>
+              </Link>
+            </Button>
+          )}
+          {status === "loading" ? (
+            <UserSkeleton />
+          ) : session ? (
+            <UserMenu session={session} />
+          ) : (
+            <Button asChild >
+              <Link href="/login">ورود / ثبت‌نام</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>

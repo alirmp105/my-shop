@@ -34,7 +34,7 @@ export function ProductCard({ product }) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
           {hasDiscount && (
-            <Badge variant="destructive" className="absolute start-3 top-3">
+            <Badge variant="destructive" className="absolute top-3">
               {discountPercent}٪ تخفیف
             </Badge>
           )}
