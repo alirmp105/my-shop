@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -9,9 +8,9 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Mail, AlertCircle } from "lucide-react";
 
-import Input from "@/components/ui/InputTest";
+import Input from "@/components/auth/Input";
 import PasswordInput from "@/components/auth/PasswordInput";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import BrandPanel from "@/components/auth/BrandPanel";
 import { loginSchema } from "@/schemas/auth";
 
@@ -55,12 +54,12 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-plum-950 p-4">
-      <div className="flex w-full max-w-4xl overflow-hidden rounded-3xl bg-plum-950 shadow-soft">
+    <main className="flex min-h-screen items-center justify-center bg-plum-950 p-4 ">
+      <div className="flex w-full max-w-4xl overflow-hidden rounded-3xl bg-plum-950 shadow-soft border">
         <BrandPanel
-          eyebrow="پنل ورود امن"
+          eyebrow="لورم ایپسوم"
           title="خوش برگشتی. حساب‌ت همون‌جاست که گذاشتیش."
-          description="با ایمیل و رمز عبور وارد شو و به داشبورد اختصاصی خودت دسترسی پیدا کن. نشست تو با JWT رمزنگاری و از سمت سرور اعتبارسنجی می‌شود."
+          description="با ایمیل و رمز عبور وارد شو و به داشبورد اختصاصی خودت دسترسی داشته باش."
         />
 
         <div className="flex w-full flex-col justify-center bg-plum-50/[0.04] p-8 md:w-1/2 md:bg-white md:p-10">
@@ -70,7 +69,7 @@ export default function LoginPage() {
               حساب نداری؟{" "}
               <Link
                 href="/register"
-                className="font-medium text-gold-600 hover:underline"
+                className="font-medium text-sky-600 hover:underline"
               >
                 همین‌جا بساز
               </Link>
@@ -99,6 +98,7 @@ export default function LoginPage() {
               placeholder="example@mail.com"
               error={errors.email?.message}
               {...register("email")}
+              dir="ltr"
             />
 
             <PasswordInput
@@ -106,26 +106,22 @@ export default function LoginPage() {
               placeholder="••••••••"
               error={errors.password?.message}
               {...register("password")}
+              dir="ltr"
             />
 
             <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-1.5 text-plum-700/70">
-                <input
-                  type="checkbox"
-                  className="h-3.5 w-3.5 rounded border-plum-700/30 text-gold-600 focus:ring-gold-500/40"
-                  {...register("remember")}
-                />
-                مرا به خاطر بسپار
-              </label>
               <Link
-                href="#"
-                className="font-medium text-plum-700/70 hover:text-gold-600"
+                href="/forgot"
+                className="font-medium text-sky-700/70 hover:text-sky-600"
               >
                 رمز عبور را فراموش کرده‌ای؟
               </Link>
             </div>
 
-            <Button type="submit">
+            <Button
+              type="submit"
+              className="w-full cursor-pointer hover:bg-black/70"
+            >
               ورود
             </Button>
           </form>

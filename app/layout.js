@@ -1,7 +1,6 @@
 "use client"
 import "@/app/styles/globals.css";
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
+
 import Provider from "@/components/SessionProvider";
 import { DirectionProvider } from "@/components/ui/direction";
 import { Toaster } from "@/components/ui/sonner";
@@ -47,7 +46,9 @@ export default function RootLayout({ children }) {
         <DirectionProvider direction="rtl">
          
             <CartProvider>
-              <main className="">{children}</main>
+            <div>
+               {children}
+            </div>
             </CartProvider>
           
           <Toaster />

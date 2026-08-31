@@ -7,6 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { getBrands } from "@/lib/data/brands";
+import Link from "next/link";
 
 export async function BrandsSlider() {
   const brands = await getBrands();
@@ -34,6 +35,8 @@ export async function BrandsSlider() {
                 className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
               >
                 <div className="flex h-24 items-center justify-center rounded-xl border bg-background p-4 grayscale transition hover:grayscale-0">
+                  <Link href={`/brand/${brand.slug}`} >
+                  
                   <Image
                     src={brand.image}
                     alt={brand.nameFa}
@@ -41,6 +44,7 @@ export async function BrandsSlider() {
                     height={70}
                     className="h-auto max-h-12 w-auto"
                   />
+                  </Link>
                 </div>
               </CarouselItem>
             ))}
