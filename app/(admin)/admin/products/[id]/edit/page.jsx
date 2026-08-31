@@ -4,7 +4,8 @@ import Product from "@/models/Product";
 import Category from "@/models/Category";
 
 import ProductForm from "@/components/products/ProductForm";
-import {getCategories } from "@/lib/data/categories";
+import { getCategories } from "@/lib/data/categories";
+import { getBrands } from "@/lib/data/brands";
 import { getProduct } from "@/lib/data/products";
 
 
@@ -13,10 +14,11 @@ const EditProductPage = async ({ params }) => {
 
   const { id } = await params;
 
-  const [product, categories] =
+  const [product, categories, brands] =
     await Promise.all([
       await getProduct(id),
       await getCategories(),
+      await getBrands(),
     ]);
 
     console.log(product);
@@ -43,6 +45,7 @@ const EditProductPage = async ({ params }) => {
         mode="edit"
         product={product}
         categories={categories}
+        brands={brands}
       />
 
     </div>

@@ -57,6 +57,7 @@ const ProductForm = ({
   mode,
   product,
   categories = [],
+  brands = [],
 }) => {
   const router = useRouter();
 
@@ -86,6 +87,7 @@ const ProductForm = ({
       price: product?.price ?? "",
       stock: product?.stock ?? "",
       category: product?.category?._id || "",
+      brand: product?.brand?._id || "",
     },
   });
 
@@ -327,6 +329,13 @@ const ProductForm = ({
         "category",
         data.category
       );
+
+      if (data.brand) {
+        formData.append(
+          "brand",
+          data.brand
+        );
+      }
 
 
       // ======================================
@@ -742,6 +751,76 @@ const ProductForm = ({
                             value={category._id}
                           >
                             {category.nameFa}
+                          </SelectItem>
+
+                        )
+                      )}
+
+                    </SelectContent>
+
+                  </Select>
+
+                  {fieldState.invalid && (
+                    <FieldError
+                      errors={[
+                        fieldState.error,
+                      ]}
+                    />
+                  )}
+
+                </Field>
+              )}
+            />
+
+
+            {/* ============================= */}
+            {/* Brand */}
+            {/* ============================= */}
+
+            <Controller
+              name="brand"
+              control={form.control}
+
+              render={({
+                field,
+                fieldState,
+              }) => (
+
+                <Field>
+
+                  <FieldLabel>
+                    برند :
+                  </FieldLabel>
+
+                  <Select
+                    value={field.value}
+                    onValueChange={
+                      field.onChange
+                    }
+                  >
+
+                    <SelectTrigger className="w-full">
+                      <SelectValue
+                        placeholder="انتخاب برند (اختیاری)"
+                      />
+                    </SelectTrigger>
+
+                    <SelectContent>
+
+                      <SelectItem
+                        value=""
+                      >
+                        بدون برند
+                      </SelectItem>
+
+                      {brands.map(
+                        (brand) => (
+
+                          <SelectItem
+                            key={brand._id}
+                            value={brand._id}
+                          >
+                            {brand.nameFa}
                           </SelectItem>
 
                         )

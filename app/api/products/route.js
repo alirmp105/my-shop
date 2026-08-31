@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { productSchema } from "@/schemas/ProductSchema";
 import Category from "@/models/Category";
+import Brand from "@/models/Brand";
 // app/api/products/route.js
 import mongoose from "mongoose";
 
@@ -11,7 +12,9 @@ export async function GET() {
   try {
     await connectDB();
 
-    const products = await Product.find().populate("category");
+    const products = await Product.find()
+      .populate("category")
+      .populate("brand");
 
     return NextResponse.json(
       products.map((product) => ({
@@ -23,6 +26,7 @@ export async function GET() {
         stock: product.stock,
         image: product.image,
         category: product.category?.nameFa || product.category?.name || "بدون دسته‌بندی",
+        brand: product.brand?.nameFa || null,
       })),
     );
   } catch (error) {
@@ -88,6 +92,7 @@ console.log(
     const price = formData.get("price");
     const stock = formData.get("stock");
     const category = formData.get("category");
+    const brand = formData.get("brand");
 
 
     // ==========================================
@@ -149,6 +154,7 @@ console.log(
         price,
         stock,
         category,
+        brand: brand || undefined,
       });
 
 
@@ -207,6 +213,44 @@ console.log(
         },
         { status: 404 }
       );
+    }
+
+
+    // ==========================================
+    // بررسی Brand (Optional)
+    // ==========================================
+
+    let brandExists = null;
+
+    if (data.brand) {
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          data.brand
+        )
+      ) {
+        return NextResponse.json(
+          {
+            message:
+              "شناسه برند معتبر نیست.",
+          },
+          { status: 400 }
+        );
+      }
+
+      brandExists =
+        await Brand.findById(
+          data.brand
+        );
+
+      if (!brandExists) {
+        return NextResponse.json(
+          {
+            message:
+              "برند پیدا نشد.",
+          },
+          { status: 404 }
+        );
+      }
     }
 
 
@@ -513,6 +557,8 @@ console.log(
 
         category:
           data.category,
+
+        brand: data.brand || null,
 
         images:
           savedImages,

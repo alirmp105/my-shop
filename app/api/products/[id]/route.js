@@ -8,6 +8,7 @@ import crypto from "crypto";
 
 
 import Category from "@/models/Category";
+import Brand from "@/models/Brand";
 
 import { productSchema } from "@/schemas/ProductSchema";
 
@@ -240,6 +241,9 @@ export async function PUT(req, { params }) {
     const category =
       formData.get("category");
 
+    const brand =
+      formData.get("brand");
+
 
     // ==========================================
     // Manifest
@@ -306,6 +310,7 @@ export async function PUT(req, { params }) {
         price,
         stock,
         category,
+        brand: brand || undefined,
       });
 
 
@@ -365,6 +370,44 @@ export async function PUT(req, { params }) {
         },
         { status: 404 }
       );
+    }
+
+
+    // ==========================================
+    // بررسی Brand (Optional)
+    // ==========================================
+
+    let brandExists = null;
+
+    if (data.brand) {
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          data.brand
+        )
+      ) {
+        return NextResponse.json(
+          {
+            message:
+              "شناسه برند معتبر نیست.",
+          },
+          { status: 400 }
+        );
+      }
+
+      brandExists =
+        await Brand.findById(
+          data.brand
+        );
+
+      if (!brandExists) {
+        return NextResponse.json(
+          {
+            message:
+              "برند پیدا نشد.",
+          },
+          { status: 404 }
+        );
+      }
     }
 
 
@@ -708,6 +751,9 @@ export async function PUT(req, { params }) {
 
     product.category =
       data.category;
+
+    product.brand =
+      data.brand || null;
 
     product.images =
       finalImages;

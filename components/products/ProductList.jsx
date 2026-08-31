@@ -92,6 +92,7 @@ const ProductList = ({ products }) => {
               عکس اصلی
             </TableHead>
             <TableHead>دسته بندی</TableHead>
+            <TableHead>برند</TableHead>
             <TableHead >عملیات</TableHead>
           </TableRow>
         </TableHeader>
@@ -101,7 +102,7 @@ const ProductList = ({ products }) => {
               <TableCell className="font-medium">
                 {product._id.slice(20, 24)}
               </TableCell>
-              <TableCell className="truncate max-w-3">{product.name}</TableCell>
+              <TableCell className="truncate max-w-3">{product.nameFa}</TableCell>
               <TableCell>
                 <Dialog>
                   <DialogTrigger asChild>
@@ -131,7 +132,7 @@ const ProductList = ({ products }) => {
                   width={50}
                   height={50}
                   src={product.primaryImage}
-                  alt={product.name}
+                  alt={product.nameFa}
                   className="mx-auto"
                 />
                 {/* {product.image.length > 1 && (
@@ -140,9 +141,10 @@ const ProductList = ({ products }) => {
                   </Button>
                 )} */}
 
-                {/* {product.name} */}
+                {/* {product.nameFa} */}
               </TableCell>
               <TableCell>{product.category}</TableCell>
+              <TableCell>{product.brand || "بدون برند"}</TableCell>
 
               <TableCell>
                 <Button asChild variant="outline">

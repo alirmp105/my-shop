@@ -30,4 +30,9 @@ export const productSchema = z.object({
   category: z
     .string()
     .min(1, "انتخاب دسته‌بندی الزامی است"),
+
+  brand: z
+    .string()
+    .optional()
+    .or(z.literal("")),
 });
