@@ -2,6 +2,18 @@
 
 import { z } from "zod";
 
+const specificationSchema = z.object({
+  key: z
+    .string()
+    .trim()
+    .min(1, "نام مشخصه الزامی است"),
+
+  value: z
+    .string()
+    .trim()
+    .min(1, "مقدار مشخصه الزامی است"),
+});
+
 export const productSchema = z.object({
   name: z
     .string()
@@ -35,4 +47,8 @@ export const productSchema = z.object({
     .string()
     .optional()
     .or(z.literal("")),
+
+  specifications: z
+    .array(specificationSchema)
+    .default([]),
 });

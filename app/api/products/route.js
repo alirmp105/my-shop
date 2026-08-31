@@ -27,6 +27,7 @@ export async function GET() {
         image: product.image,
         category: product.category?.nameFa || product.category?.name || "بدون دسته‌بندی",
         brand: product.brand?.nameFa || null,
+        specifications: product.specifications ?? [],
       })),
     );
   } catch (error) {
@@ -93,6 +94,7 @@ console.log(
     const stock = formData.get("stock");
     const category = formData.get("category");
     const brand = formData.get("brand");
+    const specificationsRaw = formData.get("specifications");
 
 
     // ==========================================
@@ -132,6 +134,37 @@ console.log(
 
 
     // ==========================================
+    // دریافت مشخصات
+    // ==========================================
+
+    let specifications = [];
+
+    if (specificationsRaw) {
+      try {
+        specifications = JSON.parse(specificationsRaw);
+      } catch {
+        return NextResponse.json(
+          {
+            message:
+              "فرمت مشخصات محصول نامعتبر است.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!Array.isArray(specifications)) {
+        return NextResponse.json(
+          {
+            message:
+              "ساختار مشخصات محصول نامعتبر است.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+
+    // ==========================================
     // دریافت فایل‌ها
     // ==========================================
 
@@ -155,6 +188,7 @@ console.log(
         stock,
         category,
         brand: brand || undefined,
+        specifications,
       });
 
 
@@ -559,6 +593,9 @@ console.log(
           data.category,
 
         brand: data.brand || null,
+
+        specifications:
+          data.specifications || [],
 
         images:
           savedImages,

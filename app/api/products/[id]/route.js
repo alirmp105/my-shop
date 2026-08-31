@@ -244,6 +244,12 @@ export async function PUT(req, { params }) {
     const brand =
       formData.get("brand");
 
+    const specificationsRaw =
+      formData.get("specifications");
+ 
+
+    console.log("form data spec" , specificationsRaw);
+    
 
     // ==========================================
     // Manifest
@@ -285,6 +291,39 @@ export async function PUT(req, { params }) {
 
 
     // ==========================================
+    // دریافت مشخصات
+    // ==========================================
+
+    let specifications = [];
+
+    if (specificationsRaw) {
+      try {
+        specifications = JSON.parse(specificationsRaw);
+        console.log("sec json parse " , specifications);
+        
+      } catch {
+        return NextResponse.json(
+          {
+            message:
+              "فرمت مشخصات محصول نامعتبر است.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!Array.isArray(specifications)) {
+        return NextResponse.json(
+          {
+            message:
+              "ساختار مشخصات محصول نامعتبر است.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+
+    // ==========================================
     // فایل‌های جدید
     // ==========================================
 
@@ -311,6 +350,7 @@ export async function PUT(req, { params }) {
         stock,
         category,
         brand: brand || undefined,
+        specifications,
       });
 
 
@@ -754,6 +794,12 @@ export async function PUT(req, { params }) {
 
     product.brand =
       data.brand || null;
+
+    product.specifications =
+      data.specifications || [];
+    
+    console.log("product.specifications " , product.specifications);
+    
 
     product.images =
       finalImages;

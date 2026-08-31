@@ -21,6 +21,25 @@ const productImageSchema = new mongoose.Schema(
   }
 );
 
+const specificationSchema = new mongoose.Schema(
+  {
+    key: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    value: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -81,6 +100,11 @@ const productSchema = new mongoose.Schema(
       type : Number,
       default : 0,
       min : 0
+    },
+
+    specifications: {
+      type: [specificationSchema],
+      default: [],
     }
   },
   {
