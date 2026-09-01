@@ -53,7 +53,7 @@ export async function updateCartItem(productId, quantity) {
 
 export async function removeFromCart(productId) {
   const response = await fetch(
-    `api/cart?productId=${encodeURIComponent(productId)}`,
+    `${CART_API_URL}?productId=${encodeURIComponent(productId)}`,
     {
       method: "DELETE",
     },

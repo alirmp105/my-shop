@@ -1,31 +1,19 @@
 import { notFound } from "next/navigation";
 
 import { connectDB } from "@/lib/mongodb";
+import { decodeSlug } from "@/lib/slug";
 import Product from "@/models/Product";
-// import مستقیم (side-effect) برای اطمینان از register شدن مدل‌های
-// ارجاع‌شده قبل از populate — اگر پروژه‌ی شما این مدل‌ها را جای دیگری
-// (مثلاً یک models/index.js مرکزی) از قبل register می‌کند، این دو خط
-// اضافی هستند اما بی‌ضرر.
+
 import "@/models/Category";
 import "@/models/Brand";
 
 import { ProductDetail } from "@/components/products/detail/ProductDetail";
 
-/**
- * محصول را با slug می‌خواند و به یک آبجکت ساده و قابل‌سریالایز
- * (برای عبور از Server به Client) تبدیل می‌کند.
- *
- * ⚠️ فرض‌های این تابع را با ساختار واقعی مدل Product خودتان تطبیق دهید:
- *   - فرض شده product.images آرایه‌ای از رشته (URL) است. اگر در پروژه‌ی
- *     شما آرایه‌ای از آبجکت (مثلاً { url, isPrimary }) است، خط images
- *     را پایین‌تر با map مناسب جایگزین کنید.
- *   - فرض شده category/brand هرکدام فیلدهای name و slug دارند.
- *   - rating / ratingCount / reviewCount فعلاً در مدل شما وجود ندارند؛
- *     چون درخواست شده مدل تغییر نکند، این‌ها همیشه null/undefined
- *     برمی‌گردند تا ProductInfo بتواند UI متناسب با «بدون داده» را نشان دهد.
- */
-async function getProduct(slug) {
+async function getProduct(rawSlug) {
   await connectDB();
+
+
+  const slug = decodeSlug(rawSlug);
 
   const product = await Product.findOne({ slug })
     .populate("category", "name slug")
@@ -41,7 +29,7 @@ async function getProduct(slug) {
     description: product.description ?? "",
     price: product.price,
     stock: product.stock ?? 0,
-    images: product.images ?? [], // ← در صورت نیاز با ساختار واقعی تطبیق دهید
+    images: product.images ?? [], 
     specifications: product.specifications ?? [],
     category: product.category
       ? { id: product.category._id.toString(), name: product.category.name, slug: product.category.slug }

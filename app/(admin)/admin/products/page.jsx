@@ -1,10 +1,12 @@
 import ProductList from "@/components/products/ProductList";
-import { getProducts } from "@/lib/data/products";
+import { getAdminProducts, getProducts } from "@/lib/data/products";
 import React from "react";
 
 
 const ProductPage = async () => {
-  const products = await getProducts();
+  const products = await getAdminProducts();
+  // console.log("product list : ", products);
+  
 
 
   return (

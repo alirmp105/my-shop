@@ -29,7 +29,7 @@ const UserMenu = ({ session }) => {
       <DropdownMenuContent>
         <DropdownMenuItem className="cursor-pointer">
           <UserIcon />
-          <Link href="/dashboard">پروفایل</Link>
+          <Link href="/dashboard"  >پروفایل</Link>
         </DropdownMenuItem>
         {session?.user?.role === "admin" && (
           <DropdownMenuItem asChild className="cursor-pointer">

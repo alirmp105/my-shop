@@ -102,7 +102,7 @@ const ProductList = ({ products }) => {
               <TableCell className="font-medium">
                 {product._id.slice(20, 24)}
               </TableCell>
-              <TableCell className="truncate max-w-3">{product.nameFa}</TableCell>
+              <TableCell className="truncate max-w-3">{product.name}</TableCell>
               <TableCell>
                 <Dialog>
                   <DialogTrigger asChild>
@@ -132,7 +132,7 @@ const ProductList = ({ products }) => {
                   width={50}
                   height={50}
                   src={product.primaryImage}
-                  alt={product.nameFa}
+                  alt={product.name}
                   className="mx-auto"
                 />
                 {/* {product.image.length > 1 && (
@@ -143,8 +143,8 @@ const ProductList = ({ products }) => {
 
                 {/* {product.nameFa} */}
               </TableCell>
-              <TableCell>{product.category}</TableCell>
-              <TableCell>{product.brand || "بدون برند"}</TableCell>
+              <TableCell>{product.category.nameFa}</TableCell>
+              <TableCell>{product.brand?.nameFa ?? "بدون برند"}</TableCell>
 
               <TableCell>
                 <Button asChild variant="outline">

@@ -3,10 +3,7 @@ import { ArrowLeft, MessageCircle, Star } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 
-/**
- * نام محصول + امتیاز/نظرات (UI آماده برای آینده) + خلاصه مهم‌ترین
- * مشخصات. کاملاً Server Component است — هیچ تعاملی ندارد.
- */
+
 export function ProductInfo({ product }) {
   const importantSpecs = product.specifications?.slice(0, 2) ?? [];
 

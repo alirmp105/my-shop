@@ -1,6 +1,4 @@
-/**
- * توضیحات محصول. اگر توضیحاتی وجود نداشته باشد چیزی رندر نمی‌شود.
- */
+
 export function ProductDescription({ description }) {
   if (!description) {
     return null;
