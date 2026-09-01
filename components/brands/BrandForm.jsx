@@ -64,8 +64,7 @@ const BrandForm = ({ mode = "create", brand }) => {
       // بر اساس اسناد دو ورودی میگیرد که ورودی اول اسم فیلد مد نظر است
     }
   }, [nameEn, isEdit, form]);
-  //[name, isEdit, form]
-  // why ont obly name?
+  
 
   const handleImageChange = (file, onChange) => {
     if (!file) return;
@@ -73,7 +72,7 @@ const BrandForm = ({ mode = "create", brand }) => {
     onChange(file);
 
     const previewUrl = URL.createObjectURL(file);
-    // ??
+   
 
     setImagePreview(previewUrl);
   };
@@ -106,7 +105,6 @@ const BrandForm = ({ mode = "create", brand }) => {
         method,
         body: formData,
       });
-      console.log("res", res);
 
       const result = await res.json();
 

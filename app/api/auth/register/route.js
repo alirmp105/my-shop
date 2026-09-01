@@ -12,7 +12,6 @@ export async function POST(req) {
 
     const body = await req.json();
 
-    // Validation سمت سرور
     const result = registerSchema.safeParse(body);
 
     if (!result.success) {
@@ -31,7 +30,6 @@ export async function POST(req) {
       password,
     } = result.data;
 
-    // بررسی وجود کاربر
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -43,13 +41,11 @@ export async function POST(req) {
       );
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(
       password,
       12
     );
 
-    // ایجاد User
     const user = await User.create({
       name,
       email,

@@ -12,7 +12,6 @@ export async function POST(request) {
   try {
     await connectDB();
 
-    // Check authentication
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
@@ -24,18 +23,12 @@ export async function POST(request) {
         { status: 401 }
       );
     }
-    // const userId = session.user.id;
-    console.log("session : " , session);
     
 
-    // Get request body
     const body = await request.json();
-    console.log("body :  " , body);
     
 
     const { productId, quantity = 1 } = body;
-  console.log("body :  " , body);
-    // Validate productId
     if (!productId) {
       return NextResponse.json(
         {
@@ -46,7 +39,6 @@ export async function POST(request) {
       );
     }
 
-    // Validate quantity
     if (!Number.isInteger(quantity) || quantity < 1) {
       return NextResponse.json(
         {
@@ -57,7 +49,6 @@ export async function POST(request) {
       );
     }
 
-    // Find product
     const product = await Product.findById(productId);
 
     if (!product) {
@@ -70,7 +61,6 @@ export async function POST(request) {
       );
     }
 
-    // Check stock
     if (product.stock < 1) {
       return NextResponse.json(
         {
@@ -86,7 +76,6 @@ export async function POST(request) {
       user: session.user.id,
     });
 
-    // Create cart if it doesn't exist
     if (!cart) {
       cart = new Cart({
         user: session.user.id,

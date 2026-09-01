@@ -4,7 +4,7 @@ import React from 'react';
 
 const layout = ({children}) => {
     return (
-        <div>
+        <div className='w-full min-w-0' >
             <Header />
             {children}
             <Footer />

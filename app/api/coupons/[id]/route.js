@@ -23,13 +23,10 @@ export async function PUT(request, { params }) {
 
   try {
     const body = await request.json();
-    console.log("body :", body);
     const validation = couponSchema.safeParse(body);
-    console.log("validation", validation);
 
     if (!validation.success) {
       const firstIssue = validation.error.issues[0];
-      // ??
       return NextResponse.json(
         { message: firstIssue?.message || "اطلاعات ارسالی معتبر نیست" },
         { status: 400 },
@@ -37,7 +34,6 @@ export async function PUT(request, { params }) {
     }
 
     const data = validation.data;
-    console.log("data :" , data);
     await connectDB();
 
     const coupon = await Coupon.findByIdAndUpdate(id,data ,  { new: true, runValidators: true });
@@ -70,14 +66,8 @@ export async function DELETE(request, { params }) {
     await connectDB();
 
     const { id } = await params;
-    console.log("couopon id from backend :  ", id);
     
-    // if (isValidId(id)) {
-    //   return NextResponse.json(
-    //     { message: "شناسه کد تخفیف معتبر نیست" },
-    //     { status: 400 },
-    //   );
-    // }
+  
      if (!mongoose.Types.ObjectId.isValid(id)) {
           return NextResponse.json({ message: "شناسه دسته بندی معتبر نیست" }, { status: 400 });
         }

@@ -50,15 +50,11 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ==========================================
   // تصاویر
-  // ==========================================
 
   const [images, setImages] = useState([]);
 
-  // ==========================================
   // React Hook Form
-  // ==========================================
 
   const form = useForm({
     resolver: zodResolver(productSchema),
@@ -84,9 +80,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
     name: "specifications",
   });
 
-  // ==========================================
   // Edit → تصاویر قبلی
-  // ==========================================
 
   useEffect(() => {
     if (!isEdit || !product?.images) {
@@ -110,10 +104,8 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
     setImages(existingImages);
   }, [isEdit, product]);
 
-  // ==========================================
   // Create → Slug خودکار
   // Edit → slug حفظ می‌شود
-  // ==========================================
 
   const productName = form.watch("name");
 
@@ -123,9 +115,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
     }
   }, [productName, isEdit, form]);
 
-  // ==========================================
   // انتخاب تصویر
-  // ==========================================
 
   const handleImagesChange = (event) => {
     const files = Array.from(event.target.files || []);
@@ -168,9 +158,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
     event.target.value = "";
   };
 
-  // ==========================================
   // حذف تصویر
-  // ==========================================
 
   const removeImage = (id) => {
     setImages((prev) => {
@@ -192,9 +180,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
     });
   };
 
-  // ==========================================
   // انتخاب Primary
-  // ==========================================
 
   const setPrimaryImage = (id) => {
     setImages((prev) =>
@@ -206,17 +192,13 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
     );
   };
 
-  // ==========================================
   // Submit
-  // ==========================================
 
   const onSubmit = async (data) => {
     setServerError("");
     setIsSubmitting(true);
     try {
-      // --------------------------------------
       // بررسی تصاویر
-      // --------------------------------------
 
       if (images.length === 0) {
         setServerError("حداقل یک تصویر برای محصول انتخاب کنید.");
@@ -234,9 +216,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
         return;
       }
 
-      // ======================================
       // FormData
-      // ======================================
 
       const formData = new FormData();
 
@@ -260,18 +240,14 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
         JSON.stringify(data.specifications ?? []),
       );
 
-      // ======================================
       // Manifest تصاویر
-      // ======================================
 
       const imageManifest = [];
 
       let fileIndex = 0;
 
       for (const image of images) {
-        // ------------------------------------
         // تصویر قبلی
-        // ------------------------------------
 
         if (image.type === "existing") {
           imageManifest.push({
@@ -287,9 +263,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
           continue;
         }
 
-        // ------------------------------------
         // تصویر جدید
-        // ------------------------------------
 
         if (image.type === "new" && image.file) {
           formData.append("images", image.file);
@@ -310,9 +284,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
 
       formData.append("imageManifest", JSON.stringify(imageManifest));
 
-      // ======================================
       // Request
-      // ======================================
 
       const url = isEdit ? `/api/products/${product._id}` : "/api/products";
 
@@ -328,9 +300,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
 
       const result = await res.json();
 
-      // ======================================
       // Success
-      // ======================================
 
       if (res.ok) {
         toast.success(
@@ -345,9 +315,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
         return;
       }
 
-      // ======================================
       // Error
-      // ======================================
 
       setServerError(result.message || "خطایی رخ داد.");
     } catch (error) {

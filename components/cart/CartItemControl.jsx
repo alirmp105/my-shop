@@ -121,7 +121,7 @@ export function CartItemControl({ product }) {
     <div className="flex ">
       <Button
         type="button"
-        className="rounded-l-none border-0 px-4  py-5"
+        className="rounded-l-none border-0 px-4 py-5"
         onClick={handleIncrease}
         disabled={isUpdating || isMaxQuantity}
         aria-label="افزایش تعداد"

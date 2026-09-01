@@ -5,7 +5,6 @@ import React from "react";
 
 const ProductPage = async () => {
   const products = await getAdminProducts();
-  // console.log("product list : ", products);
   
 
 

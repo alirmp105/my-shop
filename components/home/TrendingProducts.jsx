@@ -1,4 +1,3 @@
-// import { products } from "@/data/products";
 
 import { ProductCard } from "@/components/home/ProductCard";
 import {

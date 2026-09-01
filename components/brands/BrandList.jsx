@@ -43,7 +43,6 @@ const BrandList = ({ brands }) => {
     }
   };
 
-  console.log("brands :", brands);
 
   return (
     <div>

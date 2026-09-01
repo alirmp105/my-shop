@@ -39,7 +39,6 @@ export async function getUsers({
     createdAt: user.createdAt,
   }));
 }
-// import { getUsers } from "@/lib/users";
 
 const UsersPage = async ({ searchParams }) => {
   

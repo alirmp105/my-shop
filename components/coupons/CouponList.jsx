@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Pencil, PlusIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
-// import { format } from "date-fns-jalali";
 import { useRouter } from "next/navigation";
 const CouponList = ({ coupons }) => {
 

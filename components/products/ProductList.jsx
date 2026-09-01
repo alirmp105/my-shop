@@ -33,7 +33,6 @@ const ProductList = ({ products }) => {
   const [deletingId, setDeletingId] = useState(null);
   const router = useRouter();
 
-  console.log(products);
 
   const handleDelete = async (id) => {
     // const confirmed = window.confirm('are you sure ? ')

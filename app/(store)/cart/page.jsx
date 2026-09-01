@@ -10,16 +10,13 @@ import { CartSummary } from "@/components/cart/CartSummary";
 
 export default function CartPage() {
   const { cart, loading } = useCart();
-  console.log("page cart : " , cart , loading);
   
 
-  // اول Loading را بررسی می‌کنیم
   if (loading) {
     return <CartSkeleton />;
   }
 
-  // فقط وقتی مطمئن شدیم Cart لود شده،
-  // خالی بودن آن را بررسی می‌کنیم
+
   if (!cart?.items?.length) {
     return <EmptyCart />;
   }

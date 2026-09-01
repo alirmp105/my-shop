@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// import { categories } from "@/data/categories";
 import { Card } from "@/components/ui/card";
 import { cachedCategoreis, getCategories } from "@/lib/data/categories";
 
@@ -10,7 +9,7 @@ import { cachedCategoreis, getCategories } from "@/lib/data/categories";
 export async function CategoriesSection () {
   const categories = await cachedCategoreis()
   return (
-    <section id="categories" className="py-16">
+    <section id="categories" className="py-16 mx-auto">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">دسته‌بندی‌های محبوب</h2>

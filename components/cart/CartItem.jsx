@@ -9,7 +9,6 @@ import { formatToman } from "@/lib/utils";
 
 export function CartItem({ item }) {
   const { product } = item;
-  console.log("product in cartItem :" , product);
   
   const primaryImage =
     product?.images?.find((image) => image.isPrimary)?.url ??

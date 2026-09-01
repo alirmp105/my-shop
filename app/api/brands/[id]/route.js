@@ -198,7 +198,6 @@ export async function DELETE(request, { params }) {
     }
 
     const imageUrl = brand.image;
-    console.log("image url : " , imageUrl);
     
     await Brand.findByIdAndDelete(id);
 
@@ -206,7 +205,6 @@ export async function DELETE(request, { params }) {
 
      if (imageUrl) {
       const imagePath = path.join(process.cwd(), "public", imageUrl);
-      console.log('image path : ' , imagePath);
         try {
      
       await fs.unlink(imagePath);

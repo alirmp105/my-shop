@@ -4,7 +4,6 @@ import Product from "@/models/Product";
 import { productSchema } from "@/schemas/ProductSchema";
 import Category from "@/models/Category";
 import Brand from "@/models/Brand";
-// app/api/products/route.js
 import mongoose from "mongoose";
 
 
@@ -41,10 +40,6 @@ export async function GET() {
 
 
 
-// app/api/products/route.js
-
-
-// app/api/products/route.js
 
 
 import { mkdir, writeFile } from "fs/promises";
@@ -55,7 +50,7 @@ import crypto from "crypto";
 
 
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;  
 
 const allowedTypes = [
   "image/jpeg",
@@ -76,15 +71,9 @@ export async function POST(req) {
 
     const formData = await req.formData();
 
-    console.log(
-  "IMAGE MANIFEST:",
-  formData.get("imageManifest")
-);
 
-console.log(
-  "FILES:",
-  formData.getAll("images")
-);
+
+
 
 
     const name = formData.get("name");
@@ -97,9 +86,7 @@ console.log(
     const specificationsRaw = formData.get("specifications");
 
 
-    // ==========================================
     // دریافت Manifest تصاویر
-    // ==========================================
 
     let imageManifest;
 
@@ -133,9 +120,7 @@ console.log(
     }
 
 
-    // ==========================================
     // دریافت مشخصات
-    // ==========================================
 
     let specifications = [];
 
@@ -164,9 +149,7 @@ console.log(
     }
 
 
-    // ==========================================
     // دریافت فایل‌ها
-    // ==========================================
 
     const files = formData
       .getAll("images")
@@ -175,9 +158,7 @@ console.log(
       );
 
 
-    // ==========================================
     // Zod
-    // ==========================================
 
     const validation =
       productSchema.safeParse({
@@ -211,9 +192,7 @@ console.log(
     const data = validation.data;
 
 
-    // ==========================================
     // بررسی Category
-    // ==========================================
 
     if (
       !mongoose.Types.ObjectId.isValid(
@@ -250,9 +229,6 @@ console.log(
     }
 
 
-    // ==========================================
-    // بررسی Brand (Optional)
-    // ==========================================
 
     let brandExists = null;
 
@@ -288,9 +264,7 @@ console.log(
     }
 
 
-    // ==========================================
     // بررسی Slug
-    // ==========================================
 
     const existingProduct =
       await Product.findOne({
@@ -310,9 +284,7 @@ console.log(
     }
 
 
-    // ==========================================
     // بررسی تعداد تصاویر
-    // ==========================================
 
     if (
       imageManifest.length === 0
@@ -328,9 +300,7 @@ console.log(
     }
 
 
-    // ==========================================
     // همه تصاویر Create باید NEW باشند
-    // ==========================================
 
     const invalidManifest =
       imageManifest.some(
@@ -351,9 +321,7 @@ console.log(
     }
 
 
-    // ==========================================
     // بررسی fileIndex
-    // ==========================================
 
     const usedIndexes = new Set();
 
@@ -434,9 +402,7 @@ console.log(
     }
 
 
-    // ==========================================
     // بررسی فایل‌ها
-    // ==========================================
 
     for (const file of files) {
 
@@ -472,9 +438,7 @@ console.log(
     }
 
 
-    // ==========================================
     // دقیقاً یک Primary
-    // ==========================================
 
     const primaryCount =
       imageManifest.filter(
@@ -497,9 +461,7 @@ console.log(
     }
 
 
-    // ==========================================
     // مسیر Upload
-    // ==========================================
 
     const uploadDirectory =
       path.join(
@@ -518,9 +480,7 @@ console.log(
     );
 
 
-    // ==========================================
     // ذخیره تصاویر
-    // ==========================================
 
     const savedImages = [];
 
@@ -572,9 +532,7 @@ console.log(
     }
 
 
-    // ==========================================
     // ایجاد Product
-    // ==========================================
 
     const product =
       await Product.create({
@@ -602,9 +560,7 @@ console.log(
       });
 
 
-    // ==========================================
     // Response
-    // ==========================================
 
     return NextResponse.json(
       {

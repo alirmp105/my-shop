@@ -26,7 +26,7 @@ export async function BrandsSlider() {
 
         <Carousel
           opts={{ align: "start", loop: true, direction: "rtl" }}
-          className="mx-auto max-w-5xl"
+          className="mx-auto max-w-5xl w-full overflow-hidden"
         >
           <CarouselContent>
             {brands.map((brand) => (

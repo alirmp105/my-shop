@@ -25,17 +25,14 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log("load cart start");
   
   const loadCart = useCallback(async () => {
     try {
-      // setLoading(true);
       setError(null);
 
       const data = await fetchCart();
 
       setCart(data.cart);
-      console.log("data cart : ", data.cart);
     } catch (error) {
       console.error("Load cart error:", error);
 
@@ -63,7 +60,6 @@ export function CartProvider({ children }) {
 
       const data = await addToCartRequest(productId, quantity);
 
-      console.log("post cart : ", data.cart);
       setCart(data.cart);
 
       return data.cart;

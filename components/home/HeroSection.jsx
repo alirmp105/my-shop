@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import img from "@/public/images/hero2.jpg"
 export function HeroSection() {
   return (
-    <section className="border-b bg-muted/30">
+    <section className="border-b bg-muted/30 w-full">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
         <div className="text-center lg:text-right">
           <span className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">

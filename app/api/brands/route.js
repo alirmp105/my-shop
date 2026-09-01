@@ -21,23 +21,19 @@ export async function POST(request) {
     const slug = formData.get("slug");
     const image = formData.get("image");
 
-    // بررسی اولیه فایل
     if (!(image instanceof File)) {
       return NextResponse.json(
         { message: "تصویر برند الزامی است" },
         { status: 400 },
       );
     }
-    // file vaildation :
 
-    // تبدیل اطلاعات FormData برای Zod
     const validation = brandCreateSchema.safeParse({
       nameFa,
       nameEn,
       slug,
       image,
     });
-    console.log("validation : ", validation);
     if (!allowedTypes.includes(image.type)) {
       return NextResponse.json(
         {
@@ -55,7 +51,6 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-    console.log("validation data : ", validation.data);
 
     if (!validation.success) {
       return NextResponse.json(
@@ -67,7 +62,6 @@ export async function POST(request) {
       );
     }
 
-    // بررسی تکراری بودن slug
     const existingbrand = await Brand.findOne({ slug });
 
     if (existingbrand) {
@@ -77,7 +71,6 @@ export async function POST(request) {
       );
     }
 
-    // مسیر ذخیره تصاویر
     const uploadDir = path.join(process.cwd(), "public", "uploads", "brands");
 
     await fs.mkdir(uploadDir, { recursive: true });

@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
-// import { productSchema } from "@/schemas/ProductSchema";
 import Category from "@/models/Category";
-// app/api/products/route.js
+
 
 
 

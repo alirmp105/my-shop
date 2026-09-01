@@ -21,7 +21,7 @@ const EditProductPage = async ({ params }) => {
       await getBrands(),
     ]);
 
-    console.log(product);
+    
     
 
 

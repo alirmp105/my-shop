@@ -17,11 +17,7 @@ export function ProductCard({ product }) {
       )
     : null;
 
-  // const handleAdd = () => {
-  //   addToCart(product);
-  //   toast.success(`«${product.name}» به سبد خرید اضافه شد.`);
-  // };
-
+ 
   return (
     <Card className="group overflow-hidden py-0 transition-shadow hover:shadow-md">
       <Link href={`/products/${product.slug}`} className="block">

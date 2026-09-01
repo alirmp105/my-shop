@@ -99,9 +99,7 @@ const CouponForm = ({ mode, coupon }) => {
         body: JSON.stringify(data),
         
       });
- console.log("res :  ", res);
       const result = await res.json();
-      console.log("result :  ", result);
       if (res.status === 201) {
         toast.success("کد تخفیف ایجاد شد", {
           position: "top-center",
