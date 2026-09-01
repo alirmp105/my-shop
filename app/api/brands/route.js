@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
 import { connectDB } from "@/lib/mongodb";
 import Brand from "@/models/Brand";
 import { brandCreateSchema } from "@/schemas/brandSchema";
 import path from "path";
 import fs from "fs/promises";
+import { authOptions } from "@/lib/auth";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -12,6 +14,16 @@ const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const formData = await request.formData();

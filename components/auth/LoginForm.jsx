@@ -17,7 +17,7 @@ import { loginSchema } from "@/schemas/auth";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/profile";
   const denied = searchParams.get("denied");
 
   const [serverError, setServerError] = useState("");

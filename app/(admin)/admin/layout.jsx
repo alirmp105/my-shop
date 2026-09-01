@@ -3,8 +3,21 @@ import { AppSidebar } from "@/components/admin/AppSidebar"
 import { Home } from "lucide-react"
 import Link from "next/link"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function AdminLayout({ children }) {
+export default async function AdminLayout({ children }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect("/login?callbackUrl=/admin");
+  }
+
+  if (session.user.role !== "admin") {
+    redirect("/");
+  }
+
   return (
     <TooltipProvider>
     <SidebarProvider defaultOpen={true}>

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { productSchema } from "@/schemas/ProductSchema";
 import Category from "@/models/Category";
 import Brand from "@/models/Brand";
 import mongoose from "mongoose";
+import { authOptions } from "@/lib/auth";
 
 
 export async function GET() {
@@ -64,13 +66,19 @@ const allowedTypes = [
 
 export async function POST(req) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
 
     await connectDB();
 
-
-
     const formData = await req.formData();
-
 
 
 

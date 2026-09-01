@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
 
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { authOptions } from "@/lib/auth";
 
 export async function PATCH(req, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { id } = await params;

@@ -5,7 +5,9 @@ import mongoose from "mongoose";
 import { brandUpdateSchema } from "@/schemas/brandSchema";
 import fs from "fs/promises";
 import path from "path";
+import { getServerSession } from "next-auth";
 import Brand from "@/models/Brand";
+import { authOptions } from "@/lib/auth";
 
 function isValidId(id) {
   return mongoose.Types.ObjectId.isValid(id);
@@ -18,6 +20,16 @@ const maxFileSize = 5 * 1024 * 1024;
 
 export async function PUT(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { id } = await params;
@@ -177,6 +189,16 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { id } = await params;

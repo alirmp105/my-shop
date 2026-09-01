@@ -3,14 +3,25 @@ import Coupon from "@/models/Coupon";
 import { couponSchema } from "@/schemas/coupon";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 function isValidId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
 export async function PUT(request, { params }) {
-  const { id } = await params;
+  const session = await getServerSession(authOptions);
 
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  if (session.user.role !== "admin") {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
 
   if (!isValidId(id)) {
     return NextResponse.json(
@@ -63,6 +74,16 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { id } = await params;

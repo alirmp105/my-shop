@@ -3,11 +3,13 @@ import fs from "fs/promises";
 import path from "path";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
 import { connectDB } from "@/lib/mongodb";
 import Category from "@/models/Category";
 import Product from "@/models/Product";
 import { categoryUpdateSchema } from "@/schemas/categorySchema";
+import { authOptions } from "@/lib/auth";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -60,6 +62,16 @@ export async function PUT(request, { params }) {
   let uploadedFilePath = null;
 
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -138,6 +150,16 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {

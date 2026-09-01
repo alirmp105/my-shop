@@ -2,10 +2,12 @@ import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
 import { connectDB } from "@/lib/mongodb";
 import Category from "@/models/Category";
 import { categoryCreateSchema } from "@/schemas/categorySchema";
+import { authOptions } from "@/lib/auth";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -45,6 +47,16 @@ export async function POST(request) {
   let uploadedFilePath = null;
 
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
     const formData = await request.formData();
     const image = formData.get("image");

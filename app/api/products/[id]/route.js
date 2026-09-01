@@ -5,11 +5,13 @@ import { NextResponse } from "next/server";
 import { mkdir, writeFile, unlink } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { getServerSession } from "next-auth";
 
 import Category from "@/models/Category";
 import Brand from "@/models/Brand";
 
 import { productSchema } from "@/schemas/ProductSchema";
+import { authOptions } from "@/lib/auth";
 
 function isValidId(id) {
   return mongoose.Types.ObjectId.isValid(id);
@@ -47,6 +49,16 @@ export async function GET(request, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { id } = await params;
@@ -121,6 +133,16 @@ const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
 export async function PUT(req, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { id } = await params;

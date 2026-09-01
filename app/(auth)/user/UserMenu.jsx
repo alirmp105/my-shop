@@ -27,9 +27,11 @@ const UserMenu = ({ session }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem className="cursor-pointer">
-          <UserIcon />
-          <Link href="/dashboard"  >پروفایل</Link>
+        <DropdownMenuItem className="cursor-pointer" asChild>
+          <Link href="/profile">
+            <UserIcon />
+            پروفایل
+          </Link>
         </DropdownMenuItem>
         {session?.user?.role === "admin" && (
           <DropdownMenuItem asChild className="cursor-pointer">
@@ -39,9 +41,11 @@ const UserMenu = ({ session }) => {
            </Link>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem>
-          <CreditCardIcon />
-          سفارش ها
+        <DropdownMenuItem asChild>
+          <Link href="/cart">
+            <CreditCardIcon />
+            سفارش ها
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <SettingsIcon />

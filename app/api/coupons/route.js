@@ -2,9 +2,22 @@ import Coupon from "@/models/Coupon";
 import { connectDB } from "@/lib/mongodb";
 import { couponSchema } from "@/schemas/coupon";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+
 export async function POST(request) {
 
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
     const body = await request.json();
     const validation = couponSchema.safeParse(body);
