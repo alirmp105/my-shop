@@ -8,6 +8,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { StarRating } from "@/components/home/StarRating";
 import { formatToman } from "@/lib/utils";
 import { CartItemControl } from "../cart/CartItemControl";
+import { useCart } from "@/lib/cart-context";
+import CartItemControlSkeleton from "../cart/CartItemControlSkeleton";
 export function ProductCard({ product }) {
   const hasDiscount =
     product.originalPrice && product.originalPrice > product.price;
@@ -17,7 +19,7 @@ export function ProductCard({ product }) {
       )
     : null;
 
- 
+ const {loading } = useCart()
   return (
     <Card className="group overflow-hidden py-0 transition-shadow hover:shadow-md">
       <Link href={`/products/${product.slug}`} className="block">
@@ -57,7 +59,7 @@ export function ProductCard({ product }) {
       </CardContent>
 
       <CardFooter className="px-4 pb-4">
-        <CartItemControl product={product} />
+        {loading ? (<CartItemControlSkeleton />) : (<CartItemControl product={product} />)}
       </CardFooter>
     </Card>
   );

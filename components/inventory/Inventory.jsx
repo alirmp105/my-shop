@@ -29,7 +29,6 @@ import InventoryEditDialog from "@/components/inventory/InventoryDialog";
 const Inventory = ({ products }) => {
   const [error, setError] = useState(null);
 
-  console.log(products);
 
   const router = useRouter();
   const searchParams = useSearchParams();

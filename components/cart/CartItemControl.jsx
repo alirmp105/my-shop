@@ -12,10 +12,8 @@ export function CartItemControl({ product }) {
 
   const [isUpdating, setIsUpdating] = useState(false);
 
-  console.log("product in cartItemControl ", product);
 
   const productId = product._id || product.id;
-  console.log("productId : ", productId);
 
   const quantity = getCartItemQuantity(productId);
 

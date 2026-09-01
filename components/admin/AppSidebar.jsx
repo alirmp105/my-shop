@@ -55,12 +55,24 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useSession } from "next-auth/react"
+
+;
+
+
+
+
+export function AppSidebar(props) {
+  const pathname = usePathname()
+  const { isMobile } = useSidebar()
+  const session = useSession()
+  // console.log(session.data.user)
 
 const data = {
   user: {
-    name: "علی حسینی",
-    email: "ali@example.com",
-    // avatar: "/avatars/sara.jpg",
+    name: session.data?.user?.name,
+    email: session.data?.user?.email,
+    // avatar: "/avatars/example.jpg",
   },
   navMain: [
     { title: "داشبورد", url: "/admin", icon: LayoutDashboard },
@@ -95,10 +107,6 @@ const data = {
     { title: "پشتیبانی", url: "/support", icon: LifeBuoy },
   ],
 }
-
-export function AppSidebar(props) {
-  const pathname = usePathname()
-  const { isMobile } = useSidebar()
 
   return (
     <Sidebar dir="rtl" side="right" collapsible="icon" {...props}>

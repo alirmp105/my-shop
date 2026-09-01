@@ -32,7 +32,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+        <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
           <Image
             src={img}
             alt="کالکشن جدید فروشگاه"
