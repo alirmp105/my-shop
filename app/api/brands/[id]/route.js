@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { connectDB } from "@/lib/mongodb";
 
 import { NextResponse } from "next/server";
@@ -9,32 +10,42 @@ import { getServerSession } from "next-auth";
 import Brand from "@/models/Brand";
 import { authOptions } from "@/lib/auth";
 
-function isValidId(id) {
-  return mongoose.Types.ObjectId.isValid(id);
-}
-
-
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-const maxFileSize = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+function extensionForType(type) {
+  return type === "image/jpeg"
+    ? ".jpg"
+    : type === "image/png"
+      ? ".png"
+      : ".webp";
+}
 
 export async function PUT(request, { params }) {
+  let newFilePath = null;
+
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 },
+      );
     }
 
     if (session.user.role !== "admin") {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 },
+      );
     }
 
     await connectDB();
 
     const { id } = await params;
 
-    // بررسی معتبر بودن ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { message: "شناسه برند معتبر نیست" },
@@ -42,7 +53,6 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // پیدا کردن brand
     const brand = await Brand.findById(id);
 
     if (!brand) {
@@ -54,17 +64,16 @@ export async function PUT(request, { params }) {
 
     const formData = await request.formData();
 
-   const nameFa = formData.get("nameFa");
+    const nameFa = formData.get("nameFa");
     const nameEn = formData.get("nameEn");
     const slug = formData.get("slug");
     const image = formData.get("image");
 
-    // تبدیل مقدار image به undefined
-    // اگر فایل جدیدی ارسال نشده باشد
     const newImage =
-      image instanceof File && image.size > 0 ? image : undefined;
+      image instanceof File && image.size > 0
+        ? image
+        : undefined;
 
-    // Validation
     const validation = brandUpdateSchema.safeParse({
       nameFa,
       nameEn,
@@ -82,14 +91,15 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // بررسی duplicate بودن name یا slug
-    const existingbrand = await Brand.findOne({
+    const existingBrand = await Brand.findOne({
       _id: { $ne: id },
-
-      $or: [{ nameEn: nameEn.trim() }, { slug: slug.trim() }],
+      $or: [
+        { nameEn: nameEn.trim() },
+        { slug: slug.trim() },
+      ],
     });
 
-    if (existingbrand) {
+    if (existingBrand) {
       return NextResponse.json(
         {
           message: "برند با این نام یا slug قبلاً ایجاد شده است",
@@ -99,11 +109,9 @@ export async function PUT(request, { params }) {
     }
 
     let imageUrl = brand.image;
-    let newFilePath = null;
 
-    // اگر عکس جدید وجود داشت
+    // اگر تصویر جدید وجود داشت
     if (newImage) {
-      // بررسی نوع فایل
       if (!allowedTypes.includes(newImage.type)) {
         return NextResponse.json(
           {
@@ -113,8 +121,7 @@ export async function PUT(request, { params }) {
         );
       }
 
-      // بررسی حجم
-      if (newImage.size > maxFileSize) {
+      if (newImage.size > MAX_FILE_SIZE) {
         return NextResponse.json(
           {
             message: "حجم تصویر نباید بیشتر از 5 مگابایت باشد",
@@ -123,20 +130,23 @@ export async function PUT(request, { params }) {
         );
       }
 
-      const uploadDir =       path.join(process.cwd(), "public", "uploads", "brands");
+      const uploadDir = path.join(
+        process.cwd(),
+        "public",
+        "uploads",
+        "brands",
+      );
 
       await fs.mkdir(uploadDir, {
         recursive: true,
       });
 
-      const extension = path.extname(newImage.name);
-
+      const extension = extensionForType(newImage.type);
       const fileName = `${crypto.randomUUID()}${extension}`;
 
       newFilePath = path.join(uploadDir, fileName);
 
       const bytes = await newImage.arrayBuffer();
-
       const buffer = Buffer.from(bytes);
 
       await fs.writeFile(newFilePath, buffer);
@@ -144,8 +154,8 @@ export async function PUT(request, { params }) {
       imageUrl = `/uploads/brands/${fileName}`;
     }
 
-    // آپدیت MongoDB
     const oldImageUrl = brand.image;
+
     brand.nameFa = nameFa.trim();
     brand.nameEn = nameEn.trim();
     brand.slug = slug.trim();
@@ -153,18 +163,23 @@ export async function PUT(request, { params }) {
 
     await brand.save();
 
-    // اگر عکس جدید ذخیره شد،
-    // عکس قبلی را حذف کن
+    // اگر تصویر جدید با موفقیت در DB ثبت شد،
+    // تصویر قبلی را حذف کن
     if (newImage && oldImageUrl) {
-      const oldFilePath = path.join(process.cwd(), "public", oldImageUrl);
+      const oldFilePath = path.join(
+        process.cwd(),
+        "public",
+        oldImageUrl,
+      );
 
       try {
         await fs.unlink(oldFilePath);
       } catch (error) {
-        console.error("old brand image delete error : ", error);
+        console.error(
+          "old brand image delete error:",
+          error,
+        );
       }
-
-      // این قسمت باید قبل از تغییر brand.image ذخیره شده باشد
     }
 
     return NextResponse.json(
@@ -175,7 +190,17 @@ export async function PUT(request, { params }) {
       { status: 200 },
     );
   } catch (error) {
-   
+    // اگر فایل جدید ذخیره شده ولی DB update شکست خورد،
+    // فایل جدید را حذف کن
+    if (newFilePath) {
+      await fs.unlink(newFilePath).catch((cleanupError) => {
+        console.error(
+          "UPDATE brand image cleanup error:",
+          cleanupError,
+        );
+      });
+    }
+
     console.error("UPDATE brand ERROR:", error);
 
     return NextResponse.json(
@@ -192,16 +217,23 @@ export async function DELETE(request, { params }) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 },
+      );
     }
 
     if (session.user.role !== "admin") {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 },
+      );
     }
 
     await connectDB();
 
     const { id } = await params;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { message: "شناسه برند معتبر نیست" },
@@ -209,7 +241,6 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // پیدا کردن brand
     const brand = await Brand.findById(id);
 
     if (!brand) {
@@ -220,29 +251,33 @@ export async function DELETE(request, { params }) {
     }
 
     const imageUrl = brand.image;
-    
+
     await Brand.findByIdAndDelete(id);
 
-    //حذف فایل تصویر
+    if (imageUrl) {
+      const imagePath = path.join(
+        process.cwd(),
+        "public",
+        imageUrl,
+      );
 
-     if (imageUrl) {
-      const imagePath = path.join(process.cwd(), "public", imageUrl);
-        try {
-     
-      await fs.unlink(imagePath);
-    } catch (error) {
-      console.error("delete brand image error ", error);
+      try {
+        await fs.unlink(imagePath);
+      } catch (error) {
+        console.error(
+          "delete brand image error:",
+          error,
+        );
+      }
     }
-      
-    }
-
-  
 
     return NextResponse.json(
       { message: "برند با موفقیت حذف شد" },
       { status: 200 },
     );
   } catch (error) {
+    console.error("DELETE brand ERROR:", error);
+
     return NextResponse.json(
       { message: "خطایی در حذف برند رخ داد" },
       { status: 500 },

@@ -6,16 +6,12 @@ import { mkdir, writeFile, unlink } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { getServerSession } from "next-auth";
-
 import Category from "@/models/Category";
 import Brand from "@/models/Brand";
-
 import { productSchema } from "@/schemas/ProductSchema";
 import { authOptions } from "@/lib/auth";
 
-function isValidId(id) {
-  return mongoose.Types.ObjectId.isValid(id);
-}
+
 
 export async function GET(request, { params }) {
   const { id } = await params;

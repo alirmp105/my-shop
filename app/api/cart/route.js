@@ -236,6 +236,7 @@ export async function PATCH(request) {
         { status: 401 }
       );
     }
+    await connectDB();
 
     const body = await request.json();
 

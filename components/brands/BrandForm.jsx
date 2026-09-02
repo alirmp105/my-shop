@@ -117,13 +117,13 @@ const BrandForm = ({ mode = "create", brand }) => {
       }
 
       if (res.status === 201) {
-        toast.success("دسته بندی ایجاد شد", {
+        toast.success("برند ایجاد شد", {
           position: "top-center",
         });
       }
 
       if (res.status === 200) {
-        toast.success("دسته بندی ویرایش شد", {
+        toast.success("برند ویرایش شد", {
           position: "top-center",
         });
       }

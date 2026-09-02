@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -12,16 +13,32 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
+function extensionForType(type) {
+  return type === "image/jpeg"
+    ? ".jpg"
+    : type === "image/png"
+      ? ".png"
+      : ".webp";
+}
+
 export async function POST(request) {
+  let uploadedFilePath = null;
+
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 },
+      );
     }
 
     if (session.user.role !== "admin") {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 },
+      );
     }
 
     await connectDB();
@@ -46,6 +63,17 @@ export async function POST(request) {
       slug,
       image,
     });
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          message: "اطلاعات وارد شده صحیح نیست",
+          errors: validation.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
     if (!allowedTypes.includes(image.type)) {
       return NextResponse.json(
         {
@@ -64,46 +92,36 @@ export async function POST(request) {
       );
     }
 
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          message: "اطلاعات وارد شده صحیح نیست",
-          errors: validation.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
-    }
+    const existingBrand = await Brand.findOne({ slug });
 
-    const existingbrand = await Brand.findOne({ slug });
-
-    if (existingbrand) {
+    if (existingBrand) {
       return NextResponse.json(
         { message: "این برند وجود دارد" },
         { status: 409 },
       );
     }
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "brands");
+    const uploadDir = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      "brands",
+    );
 
     await fs.mkdir(uploadDir, { recursive: true });
 
-    // نام یکتا برای فایل
-    const extension = path.extname(image.name);
+    const extension = extensionForType(image.type);
     const fileName = `${crypto.randomUUID()}${extension}`;
 
-    const filePath = path.join(uploadDir, fileName);
+    uploadedFilePath = path.join(uploadDir, fileName);
 
-    // تبدیل File به Buffer
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // ذخیره فایل
-    await fs.writeFile(filePath, buffer);
+    await fs.writeFile(uploadedFilePath, buffer);
 
-    // URL قابل استفاده در Frontend
     const imageUrl = `/uploads/brands/${fileName}`;
 
-    // ایجاد brand
     const brand = await Brand.create({
       nameFa,
       nameEn,
@@ -119,6 +137,15 @@ export async function POST(request) {
       { status: 201 },
     );
   } catch (error) {
+    if (uploadedFilePath) {
+      await fs.unlink(uploadedFilePath).catch((cleanupError) => {
+        console.error(
+          "CREATE brand image cleanup error:",
+          cleanupError,
+        );
+      });
+    }
+
     console.error("CREATE brand ERROR:", error);
 
     return NextResponse.json(

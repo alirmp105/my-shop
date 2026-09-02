@@ -259,7 +259,7 @@ export function AppSidebar(props) {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
+                <DropdownMenuItem variant="destructive"  onClick={()=> signOut({callbackUrl : "/"})} >
                   <LogOut />
                   خروج از حساب
                 </DropdownMenuItem>

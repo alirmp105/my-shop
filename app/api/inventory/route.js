@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
-import Category from "@/models/Category";
-
-
-
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
 
 export async function GET(req) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { searchParams } = new URL(req.url);
@@ -28,14 +36,13 @@ export async function GET(req) {
       .populate("category")
       .sort({ createdAt: -1 });
 
-    return NextResponse.json( products);
-
+    return NextResponse.json(products);
   } catch (error) {
     console.error(error);
 
     return NextResponse.json(
-      { message: "خطا در دریافت محصولات" },
-      { status: 500 }
+      { message: "خطا در دریافت موجودی محصولات" },
+      { status: 500 },
     );
   }
 }
