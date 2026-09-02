@@ -37,7 +37,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="right" className="w-72">
             <SheetHeader>
-              <SheetTitle>فروشگاه لوتوس</SheetTitle>
+              <SheetTitle>فروشگاه من</SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-1 px-4">
               {mainNav.map((item) => (
@@ -58,7 +58,7 @@ export function Header() {
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ShoppingBag className="size-5" />
           </span>
-          <span className="hidden text-lg sm:inline">فروشگاه لوتوس</span>
+          <span className="hidden text-lg sm:inline">فروشگاه من</span>
         </Link>
 
         {/* Desktop nav */}

@@ -6,7 +6,9 @@ const Brands = async() => {
 const brands = await getBrands();
     return (
         <div>
+            
             <BrandList brands={brands} />
+            
         </div>
     );
 };

@@ -21,7 +21,7 @@ export function Footer() {
           <div>
             <h3 className="mb-3 text-base font-bold">فروشگاه لوتوس</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              فروشگاه آنلاین لوتوس از سال ۱۳۹۸ در حال ارائه محصولات باکیفیت با بهترین قیمت به
+              فروشگاه آنلاین من از سال ۱۳۹۸ در حال ارائه محصولات باکیفیت با بهترین قیمت به
               مشتریان سراسر کشور است.
             </p>
             <div className="mt-4 flex items-center gap-2">
@@ -89,7 +89,7 @@ export function Footer() {
         <Separator className="my-10" />
 
         <p className="text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} فروشگاه لوتوس. تمامی حقوق محفوظ است.
+          © {new Date().getFullYear()} فروشگاه من. تمامی حقوق محفوظ است.
         </p>
       </div>
     </footer>
