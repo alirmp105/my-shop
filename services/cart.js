@@ -3,8 +3,20 @@ const CART_API_URL = "/api/cart";
 async function handleResponse(response) {
   const data = await response.json();
 
+  if(response.status ===401 ){
+    return {
+      success : false,
+      code : "unauthorized"
+    }
+  }
+
+
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    const error = new Error(data.message || "Something went wrong");
+    error.status = response.status;
+    error.code = data.code;
+    
+    throw error;
   }
 
   return data;

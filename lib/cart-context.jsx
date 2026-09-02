@@ -16,6 +16,8 @@ import {
   updateCartItem as updateCartItemRequest,
   removeFromCart as removeFromCartRequest,
 } from "@/services/cart";
+import { usePathname, useRouter } from "next/navigation";
+
 
 const CartContext = createContext(null);
 
@@ -25,6 +27,11 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const pathname = usePathname()
+  const router = useRouter()
+
+
+
   
   const loadCart = useCallback(async () => {
     try {
@@ -59,6 +66,10 @@ export function CartProvider({ children }) {
       setError(null);
 
       const data = await addToCartRequest(productId, quantity);
+      if(data?.code === "unauthorized"){
+            router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
+            return
+           }
 
       setCart(data.cart);
 

@@ -28,9 +28,11 @@ export function CartItemControl({ product }) {
     try {
       setIsUpdating(true);
 
-      await addToCart(productId, 1);
+     const result = await addToCart(productId, 1);
+     console.log("result of add to cart :" , result);
+     
 
-      toast.success(`«${product.name}» به سبد خرید اضافه شد.`);
+      // toast.success(`«${product.name}» به سبد خرید اضافه شد.`);
     } catch (error) {
       console.error("Add to cart error:", error);
 
