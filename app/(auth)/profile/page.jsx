@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -30,6 +32,12 @@ export default async function ProfilePage() {
             <p className="text-muted-foreground">نقش</p>
             <p className="mt-1 font-medium">{session.user.role === "admin" ? "ادمین" : "کاربر"}</p>
           </div>
+          <Button asChild>
+          <Link href="/">
+
+        بازگشت به صفحه اصلی
+          </Link>
+          </Button>
         </div>
       </div>
     </main>

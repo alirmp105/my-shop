@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-
+import AppBreadcrumb  from "@/components/breadcarmb";
 export default async function AdminLayout({ children }) {
   const session = await getServerSession(authOptions);
 
@@ -30,16 +30,17 @@ export default async function AdminLayout({ children }) {
           
           {/* بردکرامب */}
           <nav className="flex items-center gap-2 text-sm">
-            <Link 
+            {/* <Link 
               href="/admin" 
               className="text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
               <Home className="size-4" />
               داشبورد
             </Link>
-            <span className="text-muted-foreground">/</span>
-           
+            <span className="text-muted-foreground">/</span> */}
+           <AppBreadcrumb />
           </nav>
+          
         </header>
 
         {/* محتوای صفحه */}
