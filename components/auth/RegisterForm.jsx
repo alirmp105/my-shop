@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +35,8 @@ const RegisterForm = () => {
 
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const form = useForm({
     resolver: zodResolver(registerSchema),
@@ -90,7 +92,7 @@ const RegisterForm = () => {
 
         toast.error("ثبت‌نام انجام شد اما ورود خودکار انجام نشد.");
 
-        router.push("/login");
+        router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
 
         return;
       }
@@ -99,7 +101,7 @@ const RegisterForm = () => {
         position: "top-center",
       });
 
-      router.push("/");
+      router.push(callbackUrl);
 
       router.refresh();
     } catch (error) {
@@ -191,7 +193,7 @@ const RegisterForm = () => {
                     className="pr-10"
                     placeholder="حداقل ۸ کاراکتر"
                     autoComplete="new-password"
-                    dir="ltr"
+                    dir="rtl"
                     disabled={isSubmitting}
                     aria-invalid={!!form.formState.errors.password}
                   />
@@ -218,7 +220,7 @@ const RegisterForm = () => {
                     className="pr-10"
                     placeholder="رمز عبور را دوباره وارد کنید"
                     autoComplete="new-password"
-                    dir="ltr"
+                    dir="rtl"
                     disabled={isSubmitting}
                     aria-invalid={!!form.formState.errors.confirmPassword}
                   />

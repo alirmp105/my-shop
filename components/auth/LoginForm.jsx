@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
-import { Mail, AlertCircle } from "lucide-react";
+import { Mail, AlertCircle, Loader2, LogIn } from "lucide-react";
 
 import Input from "@/components/auth/Input";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { Button } from "@/components/ui/button";
 import BrandPanel from "@/components/auth/BrandPanel";
 import { loginSchema } from "@/schemas/auth";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,6 +23,11 @@ export default function LoginPage() {
 
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLogining, setIsLogining] = useState(false);
+  const session = useSession()
+  if(session.status === "authenticated"){
+    router.push("/profile")
+  }
 
   const {
     register,
@@ -33,24 +39,30 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data) => {
-    setServerError("");
-    setLoading(true);
+    try {
+      setServerError("");
+      setIsLogining(true);
 
-    const result = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    });
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+      if (result?.error) {
+        setServerError(result.error);
+        return;
+      }
+      toast.success("ورود با موفقیت انجام شد", {
+        position: "top-center",
+      });
 
-    setLoading(false);
-
-    if (result?.error) {
-      setServerError(result.error);
-      return;
+      router.push(callbackUrl);
+      router.refresh();
+    } catch (error) {
+      console.error("login error : ", error);
+    } finally {
+      setIsLogining(false);
     }
-
-    router.push(callbackUrl);
-    router.refresh();
   };
 
   return (
@@ -68,7 +80,7 @@ export default function LoginPage() {
             <p className="mt-1.5 text-sm text-plum-700/60">
               حساب نداری؟{" "}
               <Link
-                href="/register"
+                href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
                 className="font-medium text-sky-600 hover:underline"
               >
                 همین‌جا بساز
@@ -121,8 +133,10 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full cursor-pointer hover:bg-black/70"
+              disabled={isLogining}
             >
-              ورود
+              {isLogining ? <Loader2 className="animate-spin" /> : <LogIn />}
+              {isLogining ? "درحال ورود" : "ورود"}
             </Button>
           </form>
         </div>
