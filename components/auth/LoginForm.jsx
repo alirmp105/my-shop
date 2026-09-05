@@ -22,11 +22,10 @@ export default function LoginPage() {
   const denied = searchParams.get("denied");
 
   const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [isLogining, setIsLogining] = useState(false);
-  const session = useSession()
-  if(session.status === "authenticated"){
-    router.push("/profile")
+  const session = useSession();
+  if (session.status === "authenticated") {
+    router.push("/profile");
   }
 
   const {

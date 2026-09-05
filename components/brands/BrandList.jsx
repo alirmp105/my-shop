@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { PencilIcon, Plus, Trash2Icon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, PencilIcon, Plus, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -16,6 +16,70 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+function BrandCard({ brand, onDelete, deletingId }) {
+  const [showDetails, setShowDetails] = useState(false);
+  const id = brand._id;
+
+  return (
+    <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <Image
+          src={brand.image}
+          alt={brand.nameFa}
+          width={56}
+          height={56}
+          className="size-14 shrink-0 rounded-lg border object-cover"
+        />
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-bold">{brand.nameFa}</h3>
+          <p dir="ltr" className="mt-1 truncate text-xs text-muted-foreground">
+            {brand.nameEn || brand.slug || "—"}
+          </p>
+        </div>
+      </div>
+
+      {showDetails && (
+        <div className="mt-3 space-y-2 border-t pt-3 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground">شناسه</span>
+            <span className="font-mono text-xs">{id.slice(20, 24)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground">Slug</span>
+            <span dir="ltr" className="truncate">{brand.slug || "—"}</span>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-3 flex items-center justify-between border-t pt-3">
+        <button
+          type="button"
+          onClick={() => setShowDetails((current) => !current)}
+          className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+        >
+          {showDetails ? "بستن جزئیات" : "نمایش جزئیات بیشتر"}
+          {showDetails ? <ChevronUpIcon className="size-3.5" /> : <ChevronDownIcon className="size-3.5" />}
+        </button>
+        <div className="flex items-center gap-2">
+          <Button asChild size="icon" variant="outline">
+            <Link href={`/admin/brands/${id}/edit`}>
+              <PencilIcon className="size-4" />
+            </Link>
+          </Button>
+          <Button
+            size="icon"
+            variant="destructive"
+            onClick={() => onDelete(id)}
+            disabled={deletingId === id}
+          >
+            <Trash2Icon className="size-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const BrandList = ({ brands }) => {
   const [error, setError] = useState(null);
@@ -57,7 +121,19 @@ const BrandList = ({ brands }) => {
         </Link>
       </Button>
 
-      <Table className="table-fixed">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:hidden">
+        {brands?.map((brand) => (
+          <BrandCard
+            key={brand._id}
+            brand={brand}
+            onDelete={handleDelete}
+            deletingId={deletingId}
+          />
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
+      <Table className="min-w-[720px] table-auto">
         <TableHeader>
           <TableRow>
             <TableHead>شناسه</TableHead>
@@ -73,7 +149,7 @@ const BrandList = ({ brands }) => {
               <TableCell className="font-medium">
                 {brand._id.slice(20, 24)}
               </TableCell>
-              <TableCell>{brand.nameFa}</TableCell>
+              <TableCell className="max-w-[240px] truncate">{brand.nameFa}</TableCell>
               <TableCell>
                 <Image
                   src={brand.image}
@@ -103,6 +179,7 @@ const BrandList = ({ brands }) => {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 };

@@ -25,6 +25,44 @@ import {
 } from "@/components/ui/select";
 import StockStatus from "@/components/inventory/StockStatus";
 import InventoryEditDialog from "@/components/inventory/InventoryDialog";
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+
+function InventoryCard({ product }) {
+  const [showDetails, setShowDetails] = useState(false);
+
+  return (
+    <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-bold">{product.name}</h3>
+          <p className="mt-1 text-xs text-muted-foreground">دسته‌بندی: {product.category}</p>
+        </div>
+        <StockStatus stock={product.stock} />
+      </div>
+
+      {showDetails && (
+        <div className="mt-3 border-t pt-3 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground">شناسه</span>
+            <span className="font-mono text-xs">{product._id.slice(20, 24)}</span>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-3 flex items-center justify-between border-t pt-3">
+        <button
+          type="button"
+          onClick={() => setShowDetails((current) => !current)}
+          className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+        >
+          {showDetails ? "بستن جزئیات" : "نمایش جزئیات بیشتر"}
+          {showDetails ? <ChevronUpIcon className="size-3.5" /> : <ChevronDownIcon className="size-3.5" />}
+        </button>
+        <InventoryEditDialog product={product} />
+      </div>
+    </div>
+  );
+}
 
 const Inventory = ({ products }) => {
   const [error, setError] = useState(null);
@@ -68,7 +106,14 @@ const Inventory = ({ products }) => {
         </SelectContent>
       </Select>
 
-      <Table className="table-fixed">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:hidden">
+        {products?.map((product) => (
+          <InventoryCard key={product._id} product={product} />
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
+      <Table className="min-w-[760px] table-auto">
         <TableHeader>
           <TableRow>
             <TableHead>شناسه</TableHead>
@@ -85,14 +130,14 @@ const Inventory = ({ products }) => {
               <TableCell className="font-medium">
                 {product._id.slice(20, 24)}
               </TableCell>
-              <TableCell className="truncate max-w-1">{product.name}</TableCell>
+              <TableCell className="max-w-[280px] truncate">{product.name}</TableCell>
              
              
               <TableCell>
                 <StockStatus stock={product.stock} />
               </TableCell>
 
-              <TableCell>{product.category}</TableCell>
+              <TableCell className="max-w-[220px] truncate">{product.category}</TableCell>
 
               <TableCell>
                 <InventoryEditDialog product={product}  />
@@ -101,6 +146,7 @@ const Inventory = ({ products }) => {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 };

@@ -22,6 +22,47 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, Pen } from "lucide-react";
 import UserDialog from "@/components/users/UserDialog";
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+
+function UserCard({ user }) {
+  const [showDetails, setShowDetails] = React.useState(false);
+
+  return (
+    <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-bold">{user.name}</h3>
+          <p dir="ltr" className="mt-1 truncate text-xs text-muted-foreground">{user.email}</p>
+        </div>
+        <span className={`${user.isActive ? "text-green-500" : "text-red-500"} shrink-0 text-xs`}>
+          {user.isActive ? "فعال" : "غیرفعال"}
+        </span>
+      </div>
+
+      {showDetails && (
+        <div className="mt-3 space-y-2 border-t pt-3 text-sm">
+          <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">شناسه</span><span className="font-mono text-xs">{user._id.slice(20, 24)}</span></div>
+          <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">نقش</span><span>{user.role === "user" ? "کاربر" : "ادمین"}</span></div>
+        </div>
+      )}
+
+      <div className="mt-3 flex items-center justify-between border-t pt-3">
+        <button
+          type="button"
+          onClick={() => setShowDetails((current) => !current)}
+          className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+        >
+          {showDetails ? "بستن جزئیات" : "نمایش جزئیات بیشتر"}
+          {showDetails ? <ChevronUpIcon className="size-3.5" /> : <ChevronDownIcon className="size-3.5" />}
+        </button>
+        <div className="flex items-center gap-2">
+          <UserDialog user={user} />
+          <Button size="icon"><Pen className="size-4" /></Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const UserList = ({ users }) => {
   const router = useRouter();
@@ -87,7 +128,12 @@ const UserList = ({ users }) => {
       </Select>
      </div>
 
-      <Table className="table-fixed">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:hidden">
+        {users?.map((user) => <UserCard key={user._id} user={user} />)}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
+      <Table className="min-w-[900px] table-auto">
         <TableHeader>
           <TableRow>
             <TableHead>شناسه</TableHead>
@@ -106,8 +152,8 @@ const UserList = ({ users }) => {
               <TableCell className="font-medium">
                 {user._id.slice(20, 24)}
               </TableCell>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
+              <TableCell className="max-w-[220px] truncate">{user.name}</TableCell>
+              <TableCell dir="ltr" className="max-w-[280px] truncate">{user.email}</TableCell>
               <TableCell
                 className={`${user.isActive ? "text-green-500" : "text-red-500"}`}
               >
@@ -130,6 +176,7 @@ const UserList = ({ users }) => {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 };
