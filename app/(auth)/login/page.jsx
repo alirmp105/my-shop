@@ -5,8 +5,9 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-const LoginPage = () => {
-  const session = getServerSession(authOptions);
+const LoginPage = async () => {
+  const session = await getServerSession(authOptions);
+  // console.log("session : ", session);
   if(session){
     redirect("/profile")
   }

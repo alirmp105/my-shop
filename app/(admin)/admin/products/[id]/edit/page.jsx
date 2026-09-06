@@ -6,7 +6,7 @@ import Category from "@/models/Category";
 import ProductForm from "@/components/products/ProductForm";
 import { getCategories } from "@/lib/data/categories";
 import { getBrands } from "@/lib/data/brands";
-import { getProduct } from "@/lib/data/products";
+import {getProductById } from "@/lib/data/products";
 
 
 
@@ -16,7 +16,7 @@ const EditProductPage = async ({ params }) => {
 
   const [product, categories, brands] =
     await Promise.all([
-      await getProduct(id),
+      await getProductById(id),
       await getCategories(),
       await getBrands(),
     ]);
