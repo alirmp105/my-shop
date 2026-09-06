@@ -100,14 +100,14 @@ const CategoryList = ({ categories }) => {
 
   return (
     <div>
-      <h4 className="text-4xl">دسته بندی ها</h4>
+      {/* <h4 className="text-4xl">دسته بندی ها</h4> */}
       {error && <GeneralError error={error} />}
-      <Button className="my-3.5" asChild>
+      {/* <Button className="my-3.5" asChild>
         <Link href="/admin/categories/add">
           دسته بندی جدید
           <Plus />
         </Link>
-      </Button>
+      </Button> */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:hidden">
         {categories?.map((category) => (
           <CategoryCard

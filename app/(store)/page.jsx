@@ -5,7 +5,8 @@ import HeroSection  from "@/components/home/HeroSection";
 import { TrendingProducts } from "@/components/home/TrendingProducts";
 
 const Home = async () => {
-  // await new Promise(resolve =>setTimeout(resolve,4000) )
+   
+  // await new Promise(resolve =>setTimeout(resolve,4000) ) loading test
   return (
     <main className="" >
       <HeroSection />

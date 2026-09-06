@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Card } from "@/components/ui/card";
-import { cachedCategoreis, getCategories } from "@/lib/data/categories";
+import { getCategories } from "@/lib/data/categories";
 
 
 
 export async function CategoriesSection () {
-  const categories = await cachedCategoreis()
+  const categories = await getCategories()
   return (
     <section id="categories" className="py-16 mx-auto">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

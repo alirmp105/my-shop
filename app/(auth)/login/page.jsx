@@ -1,4 +1,5 @@
 import LoginForm from "@/components/auth/LoginForm";
+import LoadingDots from "@/components/Loading";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -11,7 +12,7 @@ const LoginPage = () => {
   }
   return (
     <main className="container mx-auto px-4 py-10">
-      <Suspense fallback={<div>loading ...</div>}>
+      <Suspense fallback={<LoadingDots />}>
       <LoginForm />
       </Suspense>
     </main>
