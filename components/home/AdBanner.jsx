@@ -89,7 +89,7 @@ export default function AdBanners({ banners = [], variant = "pair" }) {
           <Link
             key={banner.id || banner._id}
             href={banner.link || "#"}
-            className="group relative overflow-hidden rounded-2xl bg-muted/40 aspect-[2/1] sm:aspect-[2.4/1] shadow-sm hover:shadow-md transition-all duration-300"
+            className="group relative overflow-hidden rounded-2xl bg-muted/40 aspect-2/1 sm:aspect-[2.4/1] shadow-sm hover:shadow-md transition-all duration-300"
           >
             <Image
               src={banner.imageUrl || banner.image}

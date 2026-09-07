@@ -48,8 +48,8 @@ export default function IncredibleOffers({products}) {
           <CarouselContent className="-mr-2 md:-mr-3 flex items-center">
             
             {/* کارت اول: بنر و تایمر شگفت‌انگیز */}
-            <CarouselItem className="pr-2 md:pr-3 basis-[150px] sm:basis-[180px] shrink-0">
-              <div className="flex flex-col items-center justify-between h-[310px] py-4 text-center">
+            <CarouselItem className="pr-2 md:pr-3 basis-37.5 sm:basis-45 shrink-0">
+              <div className="flex flex-col items-center justify-between h-77.5 py-4 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20">
                   <PercentCircle />
@@ -88,11 +88,11 @@ export default function IncredibleOffers({products}) {
               return (
                 <CarouselItem
                   key={item._id || item.id}
-                  className="pr-2 md:pr-3 basis-[175px] sm:basis-[200px] md:basis-[220px] shrink-0"
+                  className="pr-2 md:pr-3 basis-43.75 sm:basis-50 md:basis-55 shrink-0"
                 >
                   <Link
                     href={`/products/${item.slug || item._id}`}
-                    className="group flex flex-col justify-between h-[310px] bg-background text-foreground rounded-2xl p-3.5 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 select-none"
+                    className="group flex flex-col justify-between h-77.5 bg-background text-foreground rounded-2xl p-3.5 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 select-none"
                   >
                     {/* تصویر محصول */}
                     <div className="relative w-full h-36 mb-2 flex items-center justify-center overflow-hidden rounded-xl bg-muted/20">
@@ -142,10 +142,10 @@ export default function IncredibleOffers({products}) {
             })}
 
             {/* کارت پایانی: مشاهده همه */}
-            <CarouselItem className="pr-2 md:pr-3 basis-[130px] sm:basis-[150px] shrink-0">
+            <CarouselItem className="pr-2 md:pr-3 basis-32.5 sm:basis-37.5 shrink-0">
               <Link
                 href="/offers"
-                className="flex flex-col items-center justify-center gap-3 h-[310px] bg-background/90 hover:bg-background text-foreground rounded-2xl p-4 text-center transition-all group"
+                className="flex flex-col items-center justify-center gap-3 h-77.5 bg-background/90 hover:bg-background text-foreground rounded-2xl p-4 text-center transition-all group"
               >
                 <div className="w-11 h-11 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <ArrowLeft className="w-5 h-5" />
