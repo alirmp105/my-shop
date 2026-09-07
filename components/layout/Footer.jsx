@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+  Twitter,
+  Youtube,
+} from "lucide-react";
 
 import { mainNav } from "@/lib/nav";
 import { Separator } from "@/components/ui/separator";
@@ -11,7 +19,12 @@ const socialLinks = [
   { icon: Mail, href: "#", label: "یوتیوب" },
 ];
 
-const customerLinks = ["پیگیری سفارش", "راهنمای خرید", "شرایط بازگشت کالا", "سوالات متداول"];
+const customerLinks = [
+  "پیگیری سفارش",
+  "راهنمای خرید",
+  "شرایط بازگشت کالا",
+  "سوالات متداول",
+];
 
 export function Footer() {
   return (
@@ -19,10 +32,10 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h3 className="mb-3 text-base font-bold">فروشگاه لوتوس</h3>
+            <h3 className="mb-3 text-base font-bold">فروشگاه من</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              فروشگاه آنلاین من از سال ۱۳۹۸ در حال ارائه محصولات باکیفیت با بهترین قیمت به
-              مشتریان سراسر کشور است.
+              فروشگاه آنلاین من از سال ۱۳۹۸ در حال ارائه محصولات باکیفیت با
+              بهترین قیمت به مشتریان سراسر کشور است.
             </p>
             <div className="mt-4 flex items-center gap-2">
               {socialLinks.map((social) => (
@@ -59,7 +72,10 @@ export function Footer() {
             <ul className="space-y-2">
               {customerLinks.map((label) => (
                 <li key={label}>
-                  <Link href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <Link
+                    href="#"
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
                     {label}
                   </Link>
                 </li>

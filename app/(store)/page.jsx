@@ -1,3 +1,4 @@
+import AdBanners from "@/components/home/AdBanner";
 import { BrandsSlider } from "@/components/home/BrandsSlider";
 import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { DiscountBanner } from "@/components/home/DiscountBanner";
@@ -12,8 +13,10 @@ const Home = async () => {
     <main className="" >
       <HeroSection />
       <CategoriesSection />
+      <AdBanners variant="pair" />
       <Offer />
       <TrendingProducts />
+      <AdBanners variant="quad" />
       <DiscountBanner />
       <BrandsSlider />
     </main>
