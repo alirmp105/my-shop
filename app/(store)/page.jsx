@@ -2,6 +2,7 @@ import { BrandsSlider } from "@/components/home/BrandsSlider";
 import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { DiscountBanner } from "@/components/home/DiscountBanner";
 import HeroSection  from "@/components/home/HeroSection";
+import Offer from "@/components/home/Offer";
 import { TrendingProducts } from "@/components/home/TrendingProducts";
 
 const Home = async () => {
@@ -11,6 +12,7 @@ const Home = async () => {
     <main className="" >
       <HeroSection />
       <CategoriesSection />
+      <Offer />
       <TrendingProducts />
       <DiscountBanner />
       <BrandsSlider />
