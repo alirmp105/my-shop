@@ -15,6 +15,7 @@ const productImageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    publicId: { type: String },
   },
   {
     _id: false,

@@ -258,6 +258,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
             url: image.url,
 
             isPrimary: image.isPrimary,
+            publicId : image.publicId,
           });
 
           continue;
@@ -338,10 +339,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
       <CardContent>
         <form id="product-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            {/* ============================= */}
             {/* Name */}
-            {/* ============================= */}
-
             <Controller
               name="name"
               control={form.control}
@@ -358,9 +356,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             />
 
-            {/* ============================= */}
             {/* Slug */}
-            {/* ============================= */}
 
             <Controller
               name="slug"
@@ -384,9 +380,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             />
 
-            {/* ============================= */}
             {/* Description */}
-            {/* ============================= */}
 
             <Controller
               name="description"
@@ -404,9 +398,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             />
 
-            {/* ============================= */}
             {/* Price */}
-            {/* ============================= */}
 
             <Controller
               name="price"
@@ -424,9 +416,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             />
 
-            {/* ============================= */}
             {/* Stock */}
-            {/* ============================= */}
 
             <Controller
               name="stock"
@@ -444,9 +434,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             />
 
-            {/* ============================= */}
             {/* Category */}
-            {/* ============================= */}
 
             <Controller
               name="category"
@@ -476,9 +464,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             />
 
-            {/* ============================= */}
             {/* Brand */}
-            {/* ============================= */}
 
             <Controller
               name="brand"
@@ -510,9 +496,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             />
 
-            {/* ============================= */}
             {/* Images */}
-            {/* ============================= */}
 
             <Field>
               <FieldLabel>تصاویر محصول :</FieldLabel>
@@ -676,9 +660,7 @@ const ProductForm = ({ mode, product, categories = [], brands = [] }) => {
               )}
             </div>
 
-            {/* ============================= */}
             {/* Server Error */}
-            {/* ============================= */}
 
             {serverError && (
               <p className="text-sm text-destructive">{serverError}</p>

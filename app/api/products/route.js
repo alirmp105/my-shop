@@ -7,9 +7,7 @@ import Category from "@/models/Category";
 import Brand from "@/models/Brand";
 import mongoose from "mongoose";
 import { authOptions } from "@/lib/auth";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
-import crypto from "crypto";
+import cloudinary from "@/lib/cloudinary";
 
 export async function GET() {
   try {
@@ -53,10 +51,46 @@ export async function GET() {
     );
   }
 }
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_IMAGES = 10;
 
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+// تابع کمکی برای آپلود یک فایل به Cloudinary
+async function uploadToCloudinary(file) {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  // بررسی Magic Bytes (امنیت واقعی)
+  const isJPEG = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  const isPNG = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e;
+  const isWebP =
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "WEBP";
+
+  if (!isJPEG && !isPNG && !isWebP) {
+    throw new Error("محتوای فایل معتبر نیست.");
+  }
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "products", // پوشه در Cloudinary
+        resource_type: "image",
+        transformation: [
+          { width: 1200, crop: "limit" }, // محدود کردن عرض برای بهینه‌سازی
+          { quality: "auto", fetch_format: "auto" }, // تبدیل خودکار به WebP/AVIF
+        ],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      },
+    );
+
+    uploadStream.end(buffer);
+  });
+}
 
 export async function POST(req) {
   try {
@@ -84,63 +118,57 @@ export async function POST(req) {
     const specificationsRaw = formData.get("specifications");
 
     // دریافت Manifest تصاویر
-
     let imageManifest;
-
     try {
       imageManifest = JSON.parse(formData.get("imageManifest") || "[]");
     } catch {
       return NextResponse.json(
-        {
-          message: "اطلاعات تصاویر معتبر نیست.",
-        },
+        { message: "اطلاعات تصاویر معتبر نیست." },
         { status: 400 },
       );
     }
 
     if (!Array.isArray(imageManifest)) {
       return NextResponse.json(
-        {
-          message: "ساختار تصاویر معتبر نیست.",
-        },
+        { message: "ساختار تصاویر معتبر نیست." },
         { status: 400 },
       );
     }
 
     // دریافت مشخصات
-
     let specifications = [];
-
     if (specificationsRaw) {
       try {
         specifications = JSON.parse(specificationsRaw);
       } catch {
         return NextResponse.json(
-          {
-            message: "فرمت مشخصات محصول نامعتبر است.",
-          },
+          { message: "فرمت مشخصات محصول نامعتبر است." },
           { status: 400 },
         );
       }
 
       if (!Array.isArray(specifications)) {
         return NextResponse.json(
-          {
-            message: "ساختار مشخصات محصول نامعتبر است.",
-          },
+          { message: "ساختار مشخصات محصول نامعتبر است." },
           { status: 400 },
         );
       }
     }
 
     // دریافت فایل‌ها
-
     const files = formData
       .getAll("images")
       .filter((item) => item instanceof File);
 
-    // Zod
+    // محدودیت تعداد فایل‌ها
+    if (files.length > MAX_IMAGES) {
+      return NextResponse.json(
+        { message: `حداکثر ${MAX_IMAGES} تصویر مجاز است.` },
+        { status: 400 },
+      );
+    }
 
+    // اعتبارسنجی Zod
     const validation = productSchema.safeParse({
       name,
       slug,
@@ -156,7 +184,6 @@ export async function POST(req) {
       return NextResponse.json(
         {
           message: "اطلاعات محصول معتبر نیست.",
-
           errors: validation.error.flatten().fieldErrors,
         },
         { status: 400 },
@@ -166,121 +193,85 @@ export async function POST(req) {
     const data = validation.data;
 
     // بررسی Category
-
     if (!mongoose.Types.ObjectId.isValid(data.category)) {
       return NextResponse.json(
-        {
-          message: "شناسه دسته‌بندی معتبر نیست.",
-        },
+        { message: "شناسه دسته‌بندی معتبر نیست." },
         { status: 400 },
       );
     }
 
     const categoryExists = await Category.findById(data.category);
-
     if (!categoryExists) {
       return NextResponse.json(
-        {
-          message: "دسته‌بندی پیدا نشد.",
-        },
+        { message: "دسته‌بندی پیدا نشد." },
         { status: 404 },
       );
     }
 
     let brandExists = null;
-
     if (data.brand) {
       if (!mongoose.Types.ObjectId.isValid(data.brand)) {
         return NextResponse.json(
-          {
-            message: "شناسه برند معتبر نیست.",
-          },
+          { message: "شناسه برند معتبر نیست." },
           { status: 400 },
         );
       }
 
       brandExists = await Brand.findById(data.brand);
-
       if (!brandExists) {
         return NextResponse.json(
-          {
-            message: "برند پیدا نشد.",
-          },
+          { message: "برند پیدا نشد." },
           { status: 404 },
         );
       }
     }
 
     // بررسی Slug
-
-    const existingProduct = await Product.findOne({
-      slug: data.slug,
-    });
-
+    const existingProduct = await Product.findOne({ slug: data.slug });
     if (existingProduct) {
       return NextResponse.json(
-        {
-          message: "محصولی با این slug وجود دارد.",
-        },
+        { message: "محصولی با این slug وجود دارد." },
         { status: 409 },
       );
     }
 
     // بررسی تعداد تصاویر
-
     if (imageManifest.length === 0) {
       return NextResponse.json(
-        {
-          message: "حداقل یک تصویر برای محصول انتخاب کنید.",
-        },
+        { message: "حداقل یک تصویر برای محصول انتخاب کنید." },
         { status: 400 },
       );
     }
 
-    // همه تصاویر Create باید NEW باشند
-
+    // همه تصاویر باید NEW باشند
     const invalidManifest = imageManifest.some((item) => item.type !== "new");
-
     if (invalidManifest) {
       return NextResponse.json(
-        {
-          message: "اطلاعات تصاویر جدید معتبر نیست.",
-        },
+        { message: "اطلاعات تصاویر جدید معتبر نیست." },
         { status: 400 },
       );
     }
 
     // بررسی fileIndex
-
     const usedIndexes = new Set();
-
     for (const item of imageManifest) {
       if (typeof item.fileIndex !== "number") {
         return NextResponse.json(
-          {
-            message: "شناسه فایل تصویر معتبر نیست.",
-          },
+          { message: "شناسه فایل تصویر معتبر نیست." },
           { status: 400 },
         );
       }
 
       if (item.fileIndex < 0 || item.fileIndex >= files.length) {
         return NextResponse.json(
-          {
-            message: "یکی از فایل‌های تصویر پیدا نشد.",
-          },
+          { message: "یکی از فایل‌های تصویر پیدا نشد." },
           { status: 400 },
         );
       }
 
-      // جلوگیری از استفاده دوباره
-      // از یک فایل
-
       if (usedIndexes.has(item.fileIndex)) {
         return NextResponse.json(
-          {
-            message: "یک فایل تصویر چند بار استفاده شده است.",
-          },
+          { message: "یک فایل تصویر چند بار استفاده شده است." },
           { status: 400 },
         );
       }
@@ -288,136 +279,87 @@ export async function POST(req) {
       usedIndexes.add(item.fileIndex);
     }
 
-    // تعداد Manifest و فایل‌ها باید برابر باشد
-
     if (usedIndexes.size !== files.length) {
       return NextResponse.json(
-        {
-          message: "تعداد تصاویر ارسال‌شده معتبر نیست.",
-        },
+        { message: "تعداد تصاویر ارسال‌شده معتبر نیست." },
         { status: 400 },
       );
     }
 
-    // بررسی فایل‌ها
-
+    // بررسی نوع و حجم فایل‌ها
     for (const file of files) {
       if (!allowedTypes.includes(file.type)) {
         return NextResponse.json(
-          {
-            message: "فرمت یکی از تصاویر مجاز نیست.",
-          },
+          { message: "فرمت یکی از تصاویر مجاز نیست." },
           { status: 400 },
         );
       }
 
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
-          {
-            message: "حجم هر تصویر نباید بیشتر از 5MB باشد.",
-          },
+          { message: "حجم هر تصویر نباید بیشتر از 5MB باشد." },
           { status: 400 },
         );
       }
     }
 
     // دقیقاً یک Primary
-
     const primaryCount = imageManifest.filter(
       (item) => item.isPrimary === true,
     ).length;
 
     if (primaryCount !== 1) {
       return NextResponse.json(
-        {
-          message: "محصول باید دقیقاً یک تصویر اصلی داشته باشد.",
-        },
+        { message: "محصول باید دقیقاً یک تصویر اصلی داشته باشد." },
         { status: 400 },
       );
     }
 
-    // مسیر Upload
-
-    const uploadDirectory = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "products",
-    );
-
-    await mkdir(uploadDirectory, {
-      recursive: true,
-    });
-
-    // ذخیره تصاویر
-
+    // آپلود تصاویر به Cloudinary
     const savedImages = [];
+    const uploadedPublicIds = []; // برای پاکسازی در صورت خطا
 
-    for (const item of imageManifest) {
-      const file = files[item.fileIndex];
+    try {
+      for (const item of imageManifest) {
+        const file = files[item.fileIndex];
 
-      const extension =
-        file.type === "image/jpeg"
-          ? ".jpg"
-          : file.type === "image/png"
-            ? ".png"
-            : ".webp";
+        const result = await uploadToCloudinary(file);
 
-      const fileName = `${crypto.randomUUID()}${extension}`;
+        uploadedPublicIds.push(result.public_id);
 
-      const filePath = path.join(uploadDirectory, fileName);
+        savedImages.push({
+          url: result.secure_url,
+          publicId: result.public_id, // برای حذف در آینده
+          isPrimary: item.isPrimary === true,
+        });
+      }
 
-      const bytes = await file.arrayBuffer();
-
-      await writeFile(filePath, Buffer.from(bytes));
-
-      savedImages.push({
-        url: `/uploads/products/${fileName}`,
-
-        isPrimary: item.isPrimary === true,
+      // ایجاد Product
+      const product = await Product.create({
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        price: data.price,
+        stock: data.stock,
+        category: data.category,
+        brand: data.brand || null,
+        specifications: data.specifications || [],
+        images: savedImages,
       });
+
+      return NextResponse.json(
+        { message: "محصول با موفقیت ایجاد شد.", product },
+        { status: 201 },
+      );
+    } catch (error) {
+      // پاکسازی فایل‌های آپلودشده در صورت خطا
+      if (uploadedPublicIds.length > 0) {
+        await cloudinary.api.delete_resources(uploadedPublicIds);
+      }
+      throw error;
     }
-
-    // ایجاد Product
-
-    const product = await Product.create({
-      name: data.name,
-
-      slug: data.slug,
-
-      description: data.description,
-
-      price: data.price,
-
-      stock: data.stock,
-
-      category: data.category,
-
-      brand: data.brand || null,
-
-      specifications: data.specifications || [],
-
-      images: savedImages,
-    });
-
-    // Response
-
-    return NextResponse.json(
-      {
-        message: "محصول با موفقیت ایجاد شد.",
-
-        product,
-      },
-      { status: 201 },
-    );
   } catch (error) {
     console.error("POST /api/products:", error);
-
-    return NextResponse.json(
-      {
-        message: error.message || "خطای داخلی سرور.",
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "خطای داخلی سرور." }, { status: 500 });
   }
 }

@@ -1,48 +1,102 @@
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
-import mongoose from "mongoose";
-import { NextResponse } from "next/server";
-import { mkdir, writeFile, unlink } from "fs/promises";
-import path from "path";
-import crypto from "crypto";
-import { getServerSession } from "next-auth";
 import Category from "@/models/Category";
 import Brand from "@/models/Brand";
 import { productSchema } from "@/schemas/ProductSchema";
 import { authOptions } from "@/lib/auth";
+import cloudinary from "@/lib/cloudinary";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGES = 10;
+const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
+// تابع کمکی آپلود فایل به Cloudinary همراه با اعتبارسنجی بایت‌های جادویی (Magic Bytes)
+async function uploadToCloudinary(file) {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
+  const isJPEG = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  const isPNG = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e;
+  const isWebP =
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "WEBP";
+
+  if (!isJPEG && !isPNG && !isWebP) {
+    throw new Error("محتوای فایل نامعتبر است یا با پسوند آن همخوانی ندارد.");
+  }
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "products",
+        resource_type: "image",
+        transformation: [
+          { width: 1200, crop: "limit" },
+          { quality: "auto", fetch_format: "auto" },
+        ],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+
+    uploadStream.end(buffer);
+  });
+}
+
+// --------------------------------------------------------------------------
+// 1. دریافت تکی محصول (GET)
+// --------------------------------------------------------------------------
 export async function GET(request, { params }) {
-  const { id } = await params;
-
-
   try {
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "شناسه محصول نامعتبر است." },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
 
     const product = await Product.findById(id).lean();
 
     if (!product) {
-      console.error("Product not found for id:", id);
       return NextResponse.json(
-        { message: "product was not found " },
-        { status: 404 },
+        { message: "محصول پیدا نشد." },
+        { status: 404 }
       );
     }
 
     return NextResponse.json({
-      id: product._id.toString(),
+      _id: product._id.toString(),
       name: product.name,
+      slug: product.slug,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+      category: product.category?.toString(),
+      brand: product.brand?.toString() || null,
+      specifications: product.specifications || [],
+      images: product.images || [],
     });
   } catch (error) {
-    console.error("error", error);
+    console.error("GET /api/products/[id]:", error);
     return NextResponse.json(
-      { message: "failed to fetch product " },
-      { status: 500 },
+      { message: "خطای سرور در دریافت اطلاعات محصول." },
+      { status: 500 }
     );
   }
 }
 
+// --------------------------------------------------------------------------
+// 2. حذف محصول و تصاویر آن از Cloudinary (DELETE)
+// --------------------------------------------------------------------------
 export async function DELETE(req, { params }) {
   try {
     const session = await getServerSession(authOptions);
@@ -55,79 +109,61 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
 
-    await connectDB();
-
     const { id } = await params;
 
-    // بررسی ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        {
-          message: "شناسه محصول معتبر نیست.",
-        },
-        { status: 400 },
+        { message: "شناسه محصول معتبر نیست." },
+        { status: 400 }
       );
     }
 
-    // محصول را پیدا کن
+    await connectDB();
+
     const product = await Product.findById(id);
 
     if (!product) {
       return NextResponse.json(
-        {
-          message: "محصول پیدا نشد.",
-        },
-        { status: 404 },
+        { message: "محصول پیدا نشد." },
+        { status: 404 }
       );
     }
 
-    // حذف فایل‌های تصاویر
+    // استخراج تمام publicId تصاویر جهت پاکسازی از Cloudinary
+    const publicIdsToDelete = (product.images || [])
+      .map((img) => img.publicId)
+      .filter(Boolean);
 
-    for (const image of product.images) {
-      if (!image?.url) continue;
-
-      const filePath = path.join(process.cwd(), "public", image.url);
-
+    if (publicIdsToDelete.length > 0) {
       try {
-        await unlink(filePath);
-
-      } catch (error) {
-        // اگر فایل قبلاً حذف شده باشد،
-        // حذف محصول را متوقف نکن
-
-        if (error.code !== "ENOENT") {
-          console.error("Error deleting image:", image.url, error);
-        }
+        await cloudinary.api.delete_resources(publicIdsToDelete);
+      } catch (cloudErr) {
+        console.error("خطا در حذف تصاویر از Cloudinary:", cloudErr);
       }
     }
 
-    // حذف محصول از MongoDB
-
+    // حذف سند از دیتابیس
     await Product.findByIdAndDelete(id);
 
     return NextResponse.json(
-      {
-        message: "محصول و تصاویر آن با موفقیت حذف شدند.",
-      },
-      { status: 200 },
+      { message: "محصول و تمامی تصاویر آن با موفقیت حذف شدند." },
+      { status: 200 }
     );
   } catch (error) {
     console.error("DELETE /api/products/[id]:", error);
-
     return NextResponse.json(
-      {
-        message: "خطایی هنگام حذف محصول رخ داد.",
-      },
-      { status: 500 },
+      { message: "خطایی هنگام حذف محصول رخ داد." },
+      { status: 500 }
     );
   }
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
+// --------------------------------------------------------------------------
+// 3. ویرایش محصول (PUT)
+// --------------------------------------------------------------------------
 export async function PUT(req, { params }) {
+  const newUploadedPublicIds = []; // جهت Rollback در صورت رخداد خطا
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -139,113 +175,86 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
 
-    await connectDB();
-
     const { id } = await params;
-
-    // بررسی ID
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        {
-          message: "شناسه محصول معتبر نیست.",
-        },
-        { status: 400 },
+        { message: "شناسه محصول معتبر نیست." },
+        { status: 400 }
       );
     }
 
-    // محصول
+    await connectDB();
 
     const product = await Product.findById(id);
-
     if (!product) {
       return NextResponse.json(
-        {
-          message: "محصول پیدا نشد.",
-        },
-        { status: 404 },
+        { message: "محصول پیدا نشد." },
+        { status: 404 }
       );
     }
 
-    // FormData
-
     const formData = await req.formData();
-
     const name = formData.get("name");
-
     const slug = formData.get("slug");
-
     const description = formData.get("description");
-
     const price = formData.get("price");
-
     const stock = formData.get("stock");
-
     const category = formData.get("category");
-
     const brand = formData.get("brand");
-
     const specificationsRaw = formData.get("specifications");
 
-
-    // Manifest
-
+    // اعتبارسنجی ساختار manifest
     let imageManifest;
-
     try {
       imageManifest = JSON.parse(formData.get("imageManifest") || "[]");
     } catch {
       return NextResponse.json(
-        {
-          message: "اطلاعات تصاویر معتبر نیست.",
-        },
-        { status: 400 },
+        { message: "اطلاعات ساختار تصاویر نامعتبر است." },
+        { status: 400 }
       );
     }
 
     if (!Array.isArray(imageManifest)) {
       return NextResponse.json(
-        {
-          message: "ساختار تصاویر معتبر نیست.",
-        },
-        { status: 400 },
+        { message: "فرمت ساختار تصاویر نامعتبر است." },
+        { status: 400 }
       );
     }
 
-    // دریافت مشخصات
-
+    // اعتبارسنجی مشخصات فنی (specifications)
     let specifications = [];
-
     if (specificationsRaw) {
       try {
         specifications = JSON.parse(specificationsRaw);
       } catch {
         return NextResponse.json(
-          {
-            message: "فرمت مشخصات محصول نامعتبر است.",
-          },
-          { status: 400 },
+          { message: "فرمت مشخصات محصول نامعتبر است." },
+          { status: 400 }
         );
       }
 
       if (!Array.isArray(specifications)) {
         return NextResponse.json(
-          {
-            message: "ساختار مشخصات محصول نامعتبر است.",
-          },
-          { status: 400 },
+          { message: "ساختار مشخصات محصول نامعتبر است." },
+          { status: 400 }
         );
       }
     }
 
-    // فایل‌های جدید
-
+    // دریافت فایل‌های باینری جدید
     const newFiles = formData
       .getAll("images")
       .filter((item) => item instanceof File);
 
-    // Zod
+    if (imageManifest.length > MAX_IMAGES) {
+      return NextResponse.json(
+        { message: `حداکثر مجاز به داشتن ${MAX_IMAGES} تصویر هستید.` },
+        { status: 400 }
+      );
+    }
 
+    // اعتبارسنجی توسط Zod
     const validation = productSchema.safeParse({
       name,
       slug,
@@ -258,298 +267,208 @@ export async function PUT(req, { params }) {
     });
 
     if (!validation.success) {
-      console.log("validation error : ", validation.error.flatten());
-
       return NextResponse.json(
         {
           message: "اطلاعات محصول معتبر نیست.",
-
           errors: validation.error.flatten().fieldErrors,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const data = validation.data;
 
-    // Category
-
+    // بررسی دسته‌بندی
     if (!mongoose.Types.ObjectId.isValid(data.category)) {
       return NextResponse.json(
-        {
-          message: "شناسه دسته‌بندی معتبر نیست.",
-        },
-        { status: 400 },
+        { message: "شناسه دسته‌بندی معتبر نیست." },
+        { status: 400 }
       );
     }
 
     const categoryExists = await Category.findById(data.category);
-
     if (!categoryExists) {
       return NextResponse.json(
-        {
-          message: "دسته‌بندی پیدا نشد.",
-        },
-        { status: 404 },
+        { message: "دسته‌بندی پیدا نشد." },
+        { status: 404 }
       );
     }
 
-    // بررسی Brand (Optional)
-
-    let brandExists = null;
-
+    // بررسی برند در صورت ارسال
     if (data.brand) {
       if (!mongoose.Types.ObjectId.isValid(data.brand)) {
         return NextResponse.json(
-          {
-            message: "شناسه برند معتبر نیست.",
-          },
-          { status: 400 },
+          { message: "شناسه برند معتبر نیست." },
+          { status: 400 }
         );
       }
 
-      brandExists = await Brand.findById(data.brand);
-
+      const brandExists = await Brand.findById(data.brand);
       if (!brandExists) {
         return NextResponse.json(
-          {
-            message: "برند پیدا نشد.",
-          },
-          { status: 404 },
+          { message: "برند پیدا نشد." },
+          { status: 404 }
         );
       }
     }
 
-    // Slug
-
+    // بررسی عدم تکراری بودن Slug به جز برای خود این محصول
     const duplicateSlug = await Product.findOne({
       slug: data.slug,
-
-      _id: {
-        $ne: id,
-      },
+      _id: { $ne: id },
     });
 
     if (duplicateSlug) {
       return NextResponse.json(
-        {
-          message: "محصول دیگری با این slug وجود دارد.",
-        },
-        { status: 409 },
+        { message: "محصول دیگری با این slug وجود دارد." },
+        { status: 409 }
       );
     }
 
-    // بررسی فایل‌های جدید
-
+    // اعتبارسنجی پسوند و حجم فایل‌های ارسالی جدید
     for (const file of newFiles) {
       if (!allowedTypes.includes(file.type)) {
         return NextResponse.json(
-          {
-            message: "فرمت یکی از تصاویر مجاز نیست.",
-          },
-          { status: 400 },
+          { message: "فرمت یکی از فایل‌های ارسالی مجاز نیست." },
+          { status: 400 }
         );
       }
 
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
-          {
-            message: "حجم هر تصویر نباید بیشتر از 5MB باشد.",
-          },
-          { status: 400 },
+          { message: "حجم هر فایل نباید از ۵ مگابایت بیشتر باشد." },
+          { status: 400 }
         );
       }
     }
 
-    // بررسی Manifest
-
-    const oldImages = product.images.map((image) => ({
-      url: image.url,
-      isPrimary: image.isPrimary,
-    }));
-
-    const oldUrls = oldImages.map((image) => image.url);
-
-    // ساخت تصاویر نهایی
+    // بررسی و مطابقت تصاویر قبلی
+    const currentImages = product.images || [];
+    const currentPublicIds = currentImages.map((img) => img.publicId).filter(Boolean);
 
     const finalImages = [];
-
-    const newlyUploadedFiles = [];
+    const usedNewIndexes = new Set();
 
     for (const item of imageManifest) {
-      // Existing
-
       if (item.type === "existing") {
-        if (!item.url || !oldUrls.includes(item.url)) {
+        // پیدا کردن تصویر بر اساس publicId یا url
+        const existingImg = currentImages.find(
+          (img) => (item.publicId && img.publicId === item.publicId) || img.url === item.url
+        );
+
+        if (!existingImg) {
           return NextResponse.json(
-            {
-              message: "یکی از تصاویر قبلی معتبر نیست.",
-            },
-            { status: 400 },
+            { message: "یکی از تصاویر قبلی در سیستم یافت نشد." },
+            { status: 400 }
           );
         }
 
         finalImages.push({
-          url: item.url,
-
+          url: existingImg.url,
+          publicId: existingImg.publicId,
           isPrimary: Boolean(item.isPrimary),
         });
-
-        continue;
-      }
-
-      // New
-
-      if (item.type === "new") {
-        if (typeof item.fileIndex !== "number") {
+      } else if (item.type === "new") {
+        if (
+          typeof item.fileIndex !== "number" ||
+          item.fileIndex < 0 ||
+          item.fileIndex >= newFiles.length
+        ) {
           return NextResponse.json(
-            {
-              message: "اطلاعات تصویر جدید معتبر نیست.",
-            },
-            { status: 400 },
+            { message: "اندیس یکی از تصاویر جدید نامعتبر است." },
+            { status: 400 }
           );
         }
 
+        if (usedNewIndexes.has(item.fileIndex)) {
+          return NextResponse.json(
+            { message: "یک فایل چند بار در ساختار جدید ارجاع داده شده است." },
+            { status: 400 }
+          );
+        }
+
+        usedNewIndexes.add(item.fileIndex);
+
+        // آپلود مستقیم به Cloudinary
         const file = newFiles[item.fileIndex];
+        const uploadResult = await uploadToCloudinary(file);
+        
+        newUploadedPublicIds.push(uploadResult.public_id);
 
-        if (!file) {
-          return NextResponse.json(
-            {
-              message: "فایل تصویر پیدا نشد.",
-            },
-            { status: 400 },
-          );
-        }
-
-        newlyUploadedFiles.push({
-          file,
-
+        finalImages.push({
+          url: uploadResult.secure_url,
+          publicId: uploadResult.public_id,
           isPrimary: Boolean(item.isPrimary),
         });
       }
     }
 
-    // Upload تصاویر جدید
-
-    const uploadDirectory = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "products",
-    );
-
-    await mkdir(uploadDirectory, {
-      recursive: true,
-    });
-
-    for (const uploaded of newlyUploadedFiles) {
-      const extension =
-        uploaded.file.type === "image/jpeg"
-          ? ".jpg"
-          : uploaded.file.type === "image/png"
-            ? ".png"
-            : ".webp";
-
-      const fileName = `${crypto.randomUUID()}${extension}`;
-
-      const filePath = path.join(uploadDirectory, fileName);
-
-      const bytes = await uploaded.file.arrayBuffer();
-
-      await writeFile(filePath, Buffer.from(bytes));
-
-      finalImages.push({
-        url: `/uploads/products/${fileName}`,
-
-        isPrimary: uploaded.isPrimary,
-      });
-    }
-
-    // حداقل یک تصویر
-
+    // حداقل ۱ تصویر الزامی است
     if (finalImages.length === 0) {
       return NextResponse.json(
-        {
-          message: "محصول باید حداقل یک تصویر داشته باشد.",
-        },
-        { status: 400 },
+        { message: "محصول باید حداقل یک تصویر داشته باشد." },
+        { status: 400 }
       );
     }
 
-    // دقیقاً یک Primary
-
-    const primaryCount = finalImages.filter((image) => image.isPrimary).length;
-
+    // الزام وجود دقیقاً یک تصویر شاخص (Primary)
+    const primaryCount = finalImages.filter((img) => img.isPrimary).length;
     if (primaryCount !== 1) {
       return NextResponse.json(
-        {
-          message: "محصول باید دقیقاً یک تصویر اصلی داشته باشد.",
-        },
-        { status: 400 },
+        { message: "محصول باید دقیقاً یک تصویر اصلی (Primary) داشته باشد." },
+        { status: 400 }
       );
     }
 
-    // پیدا کردن تصاویر حذف‌شده
-
-    const finalUrls = finalImages.map((image) => image.url);
-
-    const deletedImages = oldUrls.filter(
-      (oldUrl) => !finalUrls.includes(oldUrl),
+    // پیدا کردن تصاویری که حذف شده‌اند و باید از Cloudinary پاک شوند
+    const finalPublicIds = finalImages.map((img) => img.publicId).filter(Boolean);
+    const deletedPublicIds = currentPublicIds.filter(
+      (pubId) => !finalPublicIds.includes(pubId)
     );
 
-    // Update MongoDB
-
+    // به‌روزرسانی در دیتابیس
     product.name = data.name;
-
     product.slug = data.slug;
-
     product.description = data.description;
-
     product.price = data.price;
-
     product.stock = data.stock;
-
     product.category = data.category;
-
     product.brand = data.brand || null;
-
     product.specifications = data.specifications || [];
-
-
     product.images = finalImages;
 
     await product.save();
 
-    // حذف فایل‌های قدیمی
-
-    for (const imageUrl of deletedImages) {
-      const filePath = path.join(process.cwd(), "public", imageUrl);
-
+    // پاکسازی تصاویر حذف‌شده از Cloudinary در پس‌زمینه
+    if (deletedPublicIds.length > 0) {
       try {
-        await unlink(filePath);
-      } catch (error) {
-        console.error("خطا در حذف تصویر:", imageUrl, error);
+        await cloudinary.api.delete_resources(deletedPublicIds);
+      } catch (err) {
+        console.error("خطا در پاکسازی تصاویر حذف‌شده از Cloudinary:", err);
       }
     }
-
-    // Response
 
     return NextResponse.json(
       {
         message: "محصول با موفقیت ویرایش شد.",
-
         product,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
-    console.error("PUT /api/products/[id]:", error);
+    // در صورت بروز خطا در هر مرحله، فایل‌های جدیدی که روی کلود آپلود شده‌اند پاک شوند
+    if (newUploadedPublicIds.length > 0) {
+      try {
+        await cloudinary.api.delete_resources(newUploadedPublicIds);
+      } catch (cleanupError) {
+        console.error("خطا در Rollback تصاویر آپلودشده:", cleanupError);
+      }
+    }
 
+    console.error("PUT /api/products/[id]:", error);
     return NextResponse.json(
-      {
-        message: error.message || "خطای داخلی سرور.",
-      },
-      { status: 500 },
+      { message: "خطای داخلی سرور هنگام ویرایش محصول." },
+      { status: 500 }
     );
   }
 }
