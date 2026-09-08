@@ -7,50 +7,11 @@ import Category from "@/models/Category";
 import Brand from "@/models/Brand";
 import { productSchema } from "@/schemas/ProductSchema";
 import { authOptions } from "@/lib/auth";
-import cloudinary from "@/lib/cloudinary";
+import cloudinary, { deleteImagesFromCloudinary, uploadImageToCloudinary } from "@/lib/cloudinary";
+import { MAX_IMAGES, MAX_FILE_SIZE, allowedTypes } from "@/lib/constants";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_IMAGES = 10;
-const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-// تابع کمکی آپلود فایل به Cloudinary همراه با اعتبارسنجی بایت‌های جادویی (Magic Bytes)
-async function uploadToCloudinary(file) {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  const isJPEG = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-  const isPNG = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e;
-  const isWebP =
-    buffer.toString("ascii", 0, 4) === "RIFF" &&
-    buffer.toString("ascii", 8, 12) === "WEBP";
-
-  if (!isJPEG && !isPNG && !isWebP) {
-    throw new Error("محتوای فایل نامعتبر است یا با پسوند آن همخوانی ندارد.");
-  }
-
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "products",
-        resource_type: "image",
-        transformation: [
-          { width: 1200, crop: "limit" },
-          { quality: "auto", fetch_format: "auto" },
-        ],
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-
-    uploadStream.end(buffer);
-  });
-}
-
-// --------------------------------------------------------------------------
 // 1. دریافت تکی محصول (GET)
-// --------------------------------------------------------------------------
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
@@ -58,7 +19,7 @@ export async function GET(request, { params }) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { message: "شناسه محصول نامعتبر است." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -67,10 +28,7 @@ export async function GET(request, { params }) {
     const product = await Product.findById(id).lean();
 
     if (!product) {
-      return NextResponse.json(
-        { message: "محصول پیدا نشد." },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "محصول پیدا نشد." }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -89,14 +47,11 @@ export async function GET(request, { params }) {
     console.error("GET /api/products/[id]:", error);
     return NextResponse.json(
       { message: "خطای سرور در دریافت اطلاعات محصول." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-// --------------------------------------------------------------------------
-// 2. حذف محصول و تصاویر آن از Cloudinary (DELETE)
-// --------------------------------------------------------------------------
 export async function DELETE(req, { params }) {
   try {
     const session = await getServerSession(authOptions);
@@ -114,7 +69,7 @@ export async function DELETE(req, { params }) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { message: "شناسه محصول معتبر نیست." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -123,20 +78,16 @@ export async function DELETE(req, { params }) {
     const product = await Product.findById(id);
 
     if (!product) {
-      return NextResponse.json(
-        { message: "محصول پیدا نشد." },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "محصول پیدا نشد." }, { status: 404 });
     }
 
-    // استخراج تمام publicId تصاویر جهت پاکسازی از Cloudinary
     const publicIdsToDelete = (product.images || [])
       .map((img) => img.publicId)
       .filter(Boolean);
 
     if (publicIdsToDelete.length > 0) {
       try {
-        await cloudinary.api.delete_resources(publicIdsToDelete);
+        await deleteImagesFromCloudinary(publicIdsToDelete);
       } catch (cloudErr) {
         console.error("خطا در حذف تصاویر از Cloudinary:", cloudErr);
       }
@@ -147,20 +98,17 @@ export async function DELETE(req, { params }) {
 
     return NextResponse.json(
       { message: "محصول و تمامی تصاویر آن با موفقیت حذف شدند." },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("DELETE /api/products/[id]:", error);
     return NextResponse.json(
       { message: "خطایی هنگام حذف محصول رخ داد." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-// --------------------------------------------------------------------------
-// 3. ویرایش محصول (PUT)
-// --------------------------------------------------------------------------
 export async function PUT(req, { params }) {
   const newUploadedPublicIds = []; // جهت Rollback در صورت رخداد خطا
 
@@ -180,7 +128,7 @@ export async function PUT(req, { params }) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { message: "شناسه محصول معتبر نیست." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -188,10 +136,7 @@ export async function PUT(req, { params }) {
 
     const product = await Product.findById(id);
     if (!product) {
-      return NextResponse.json(
-        { message: "محصول پیدا نشد." },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "محصول پیدا نشد." }, { status: 404 });
     }
 
     const formData = await req.formData();
@@ -211,14 +156,14 @@ export async function PUT(req, { params }) {
     } catch {
       return NextResponse.json(
         { message: "اطلاعات ساختار تصاویر نامعتبر است." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!Array.isArray(imageManifest)) {
       return NextResponse.json(
         { message: "فرمت ساختار تصاویر نامعتبر است." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -230,14 +175,14 @@ export async function PUT(req, { params }) {
       } catch {
         return NextResponse.json(
           { message: "فرمت مشخصات محصول نامعتبر است." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (!Array.isArray(specifications)) {
         return NextResponse.json(
           { message: "ساختار مشخصات محصول نامعتبر است." },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -250,7 +195,7 @@ export async function PUT(req, { params }) {
     if (imageManifest.length > MAX_IMAGES) {
       return NextResponse.json(
         { message: `حداکثر مجاز به داشتن ${MAX_IMAGES} تصویر هستید.` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -272,7 +217,7 @@ export async function PUT(req, { params }) {
           message: "اطلاعات محصول معتبر نیست.",
           errors: validation.error.flatten().fieldErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -282,7 +227,7 @@ export async function PUT(req, { params }) {
     if (!mongoose.Types.ObjectId.isValid(data.category)) {
       return NextResponse.json(
         { message: "شناسه دسته‌بندی معتبر نیست." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -290,7 +235,7 @@ export async function PUT(req, { params }) {
     if (!categoryExists) {
       return NextResponse.json(
         { message: "دسته‌بندی پیدا نشد." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -299,7 +244,7 @@ export async function PUT(req, { params }) {
       if (!mongoose.Types.ObjectId.isValid(data.brand)) {
         return NextResponse.json(
           { message: "شناسه برند معتبر نیست." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -307,7 +252,7 @@ export async function PUT(req, { params }) {
       if (!brandExists) {
         return NextResponse.json(
           { message: "برند پیدا نشد." },
-          { status: 404 }
+          { status: 404 },
         );
       }
     }
@@ -321,7 +266,7 @@ export async function PUT(req, { params }) {
     if (duplicateSlug) {
       return NextResponse.json(
         { message: "محصول دیگری با این slug وجود دارد." },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -330,21 +275,23 @@ export async function PUT(req, { params }) {
       if (!allowedTypes.includes(file.type)) {
         return NextResponse.json(
           { message: "فرمت یکی از فایل‌های ارسالی مجاز نیست." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
           { message: "حجم هر فایل نباید از ۵ مگابایت بیشتر باشد." },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
     // بررسی و مطابقت تصاویر قبلی
     const currentImages = product.images || [];
-    const currentPublicIds = currentImages.map((img) => img.publicId).filter(Boolean);
+    const currentPublicIds = currentImages
+      .map((img) => img.publicId)
+      .filter(Boolean);
 
     const finalImages = [];
     const usedNewIndexes = new Set();
@@ -353,13 +300,15 @@ export async function PUT(req, { params }) {
       if (item.type === "existing") {
         // پیدا کردن تصویر بر اساس publicId یا url
         const existingImg = currentImages.find(
-          (img) => (item.publicId && img.publicId === item.publicId) || img.url === item.url
+          (img) =>
+            (item.publicId && img.publicId === item.publicId) ||
+            img.url === item.url,
         );
 
         if (!existingImg) {
           return NextResponse.json(
             { message: "یکی از تصاویر قبلی در سیستم یافت نشد." },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
@@ -376,14 +325,14 @@ export async function PUT(req, { params }) {
         ) {
           return NextResponse.json(
             { message: "اندیس یکی از تصاویر جدید نامعتبر است." },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
         if (usedNewIndexes.has(item.fileIndex)) {
           return NextResponse.json(
             { message: "یک فایل چند بار در ساختار جدید ارجاع داده شده است." },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
@@ -391,8 +340,8 @@ export async function PUT(req, { params }) {
 
         // آپلود مستقیم به Cloudinary
         const file = newFiles[item.fileIndex];
-        const uploadResult = await uploadToCloudinary(file);
-        
+        const uploadResult = await uploadImageToCloudinary(file, "products");
+
         newUploadedPublicIds.push(uploadResult.public_id);
 
         finalImages.push({
@@ -407,7 +356,7 @@ export async function PUT(req, { params }) {
     if (finalImages.length === 0) {
       return NextResponse.json(
         { message: "محصول باید حداقل یک تصویر داشته باشد." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -416,14 +365,16 @@ export async function PUT(req, { params }) {
     if (primaryCount !== 1) {
       return NextResponse.json(
         { message: "محصول باید دقیقاً یک تصویر اصلی (Primary) داشته باشد." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // پیدا کردن تصاویری که حذف شده‌اند و باید از Cloudinary پاک شوند
-    const finalPublicIds = finalImages.map((img) => img.publicId).filter(Boolean);
+    const finalPublicIds = finalImages
+      .map((img) => img.publicId)
+      .filter(Boolean);
     const deletedPublicIds = currentPublicIds.filter(
-      (pubId) => !finalPublicIds.includes(pubId)
+      (pubId) => !finalPublicIds.includes(pubId),
     );
 
     // به‌روزرسانی در دیتابیس
@@ -442,7 +393,7 @@ export async function PUT(req, { params }) {
     // پاکسازی تصاویر حذف‌شده از Cloudinary در پس‌زمینه
     if (deletedPublicIds.length > 0) {
       try {
-        await cloudinary.api.delete_resources(deletedPublicIds);
+        await deleteImagesFromCloudinary(deletedPublicIds);
       } catch (err) {
         console.error("خطا در پاکسازی تصاویر حذف‌شده از Cloudinary:", err);
       }
@@ -453,7 +404,7 @@ export async function PUT(req, { params }) {
         message: "محصول با موفقیت ویرایش شد.",
         product,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     // در صورت بروز خطا در هر مرحله، فایل‌های جدیدی که روی کلود آپلود شده‌اند پاک شوند
@@ -468,7 +419,7 @@ export async function PUT(req, { params }) {
     console.error("PUT /api/products/[id]:", error);
     return NextResponse.json(
       { message: "خطای داخلی سرور هنگام ویرایش محصول." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

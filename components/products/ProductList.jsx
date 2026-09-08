@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { PencilIcon, Plus, Trash2Icon } from "lucide-react";
+import { Loader, PencilIcon, Plus, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -27,6 +27,7 @@ import { PlusIcon ,ChevronDownIcon,ChevronUpIcon} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { formatToman } from "@/lib/utils";
+import LoadingDots from "../Loading";
 
 function ProductCard({ product, onDelete }) {
   const [showDetails, setShowDetails] = useState(false);
@@ -247,9 +248,11 @@ const ProductList = ({ products }) => {
                   variant="destructive"
                   className="cursor-pointer mx-3"
                   onClick={() => handleDelete(product._id)}
-                  // disabled={deletingId === (product._id || product.id)}
+                  disabled={deletingId === (product._id)}
                 >
-                  <Trash2Icon />
+                  {deletingId === (product._id) ? (
+                    <Loader className="size-4 animate-spin" />
+                  ) : ( <Trash2Icon />)}                  
                 </Button>
               </TableCell>
             </TableRow>

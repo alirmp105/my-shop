@@ -7,8 +7,9 @@ import Category from "@/models/Category";
 import Brand from "@/models/Brand";
 import mongoose from "mongoose";
 import { authOptions } from "@/lib/auth";
-import cloudinary from "@/lib/cloudinary";
-
+import cloudinary, { deleteImagesFromCloudinary } from "@/lib/cloudinary";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import { MAX_IMAGES, MAX_FILE_SIZE, allowedTypes } from "@/lib/constants";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -50,46 +51,6 @@ export async function GET() {
       { status: 500 },
     );
   }
-}
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const MAX_IMAGES = 10;
-
-const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-// تابع کمکی برای آپلود یک فایل به Cloudinary
-async function uploadToCloudinary(file) {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  // بررسی Magic Bytes (امنیت واقعی)
-  const isJPEG = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-  const isPNG = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e;
-  const isWebP =
-    buffer.toString("ascii", 0, 4) === "RIFF" &&
-    buffer.toString("ascii", 8, 12) === "WEBP";
-
-  if (!isJPEG && !isPNG && !isWebP) {
-    throw new Error("محتوای فایل معتبر نیست.");
-  }
-
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "products", // پوشه در Cloudinary
-        resource_type: "image",
-        transformation: [
-          { width: 1200, crop: "limit" }, // محدود کردن عرض برای بهینه‌سازی
-          { quality: "auto", fetch_format: "auto" }, // تبدیل خودکار به WebP/AVIF
-        ],
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      },
-    );
-
-    uploadStream.end(buffer);
-  });
 }
 
 export async function POST(req) {
@@ -318,12 +279,12 @@ export async function POST(req) {
     // آپلود تصاویر به Cloudinary
     const savedImages = [];
     const uploadedPublicIds = []; // برای پاکسازی در صورت خطا
-
+    // آپلود تصاویر به Cloudinary
     try {
       for (const item of imageManifest) {
         const file = files[item.fileIndex];
 
-        const result = await uploadToCloudinary(file);
+        const result = await uploadImageToCloudinary(file, "products");
 
         uploadedPublicIds.push(result.public_id);
 
@@ -354,7 +315,7 @@ export async function POST(req) {
     } catch (error) {
       // پاکسازی فایل‌های آپلودشده در صورت خطا
       if (uploadedPublicIds.length > 0) {
-        await cloudinary.api.delete_resources(uploadedPublicIds);
+        await deleteImagesFromCloudinary(uploadedPublicIds);
       }
       throw error;
     }
