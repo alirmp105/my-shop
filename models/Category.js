@@ -25,6 +25,9 @@ const CategorySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    imagePublicId : {
+      type : String
+    },
 
     isActive: {
       type: Boolean,

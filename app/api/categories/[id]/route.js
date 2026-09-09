@@ -1,6 +1,3 @@
-import crypto from "crypto";
-import fs from "fs/promises";
-import path from "path";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -10,39 +7,33 @@ import Category from "@/models/Category";
 import Product from "@/models/Product";
 import { categoryUpdateSchema } from "@/schemas/categorySchema";
 import { authOptions } from "@/lib/auth";
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-function extensionForType(type) {
-  return type === "image/jpeg" ? ".jpg" : type === "image/png" ? ".png" : ".webp";
-}
+import {
+  validateImageFile,
+  uploadImageToCloudinary,
+  deleteImagesFromCloudinary,
+} from "@/lib/cloudinary";
 
 function parseBoolean(value) {
   return value === true || value === "true";
 }
 
-function getCategoryImagePath(imageUrl) {
-  if (!imageUrl || !imageUrl.startsWith("/uploads/categories/")) {
-    return null;
-  }
-
-  const uploadDirectory = path.resolve(process.cwd(), "public", "uploads", "categories");
-  const resolvedPath = path.resolve(process.cwd(), "public", imageUrl.slice(1));
-  return resolvedPath.startsWith(`${uploadDirectory}${path.sep}`) ? resolvedPath : null;
-}
-
 export async function GET(request, { params }) {
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return NextResponse.json({ message: "شناسه دسته بندی معتبر نیست" }, { status: 400 });
+    return NextResponse.json(
+      { message: "شناسه دسته بندی معتبر نیست" },
+      { status: 400 }
+    );
   }
 
   try {
     await connectDB();
     const category = await Category.findById(id).lean();
     if (!category) {
-      return NextResponse.json({ message: "دسته بندی پیدا نشد" }, { status: 404 });
+      return NextResponse.json(
+        { message: "دسته بندی پیدا نشد" },
+        { status: 404 }
+      );
     }
     return NextResponse.json({
       _id: category._id.toString(),
@@ -50,16 +41,20 @@ export async function GET(request, { params }) {
       nameEn: category.nameEn || "",
       slug: category.slug,
       image: category.image,
+      imagePublicId: category.imagePublicId,
       isActive: category.isActive ?? true,
     });
   } catch (error) {
     console.error("GET /api/categories/[id]:", error);
-    return NextResponse.json({ message: "خطا در دریافت دسته بندی" }, { status: 500 });
+    return NextResponse.json(
+      { message: "خطا در دریافت دسته بندی" },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(request, { params }) {
-  let uploadedFilePath = null;
+  let uploadedPublicId = null;
 
   try {
     const session = await getServerSession(authOptions);
@@ -75,17 +70,24 @@ export async function PUT(request, { params }) {
     await connectDB();
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "شناسه دسته بندی معتبر نیست" }, { status: 400 });
+      return NextResponse.json(
+        { message: "شناسه دسته بندی معتبر نیست" },
+        { status: 400 }
+      );
     }
 
     const category = await Category.findById(id);
     if (!category) {
-      return NextResponse.json({ message: "دسته بندی پیدا نشد" }, { status: 404 });
+      return NextResponse.json(
+        { message: "دسته بندی پیدا نشد" },
+        { status: 404 }
+      );
     }
 
     const formData = await request.formData();
     const image = formData.get("image");
     const newImage = image instanceof File && image.size > 0 ? image : undefined;
+
     const validation = categoryUpdateSchema.safeParse({
       nameFa: formData.get("nameFa"),
       nameEn: formData.get("nameEn"),
@@ -94,57 +96,70 @@ export async function PUT(request, { params }) {
     });
 
     if (!validation.success) {
-      return NextResponse.json({
-        message: "اطلاعات وارد شده صحیح نیست",
-        errors: validation.error.flatten().fieldErrors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          message: "اطلاعات وارد شده صحیح نیست",
+          errors: validation.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
     }
 
-    const oldImageUrl = category.image;
-    let imageUrl = oldImageUrl;
+    let imageUrl = category.image;
+    let newPublicId = null;
 
     if (newImage) {
-      if (!allowedTypes.includes(newImage.type)) {
-        return NextResponse.json({ message: "فرمت تصویر مجاز نیست" }, { status: 400 });
-      }
-      if (newImage.size > MAX_FILE_SIZE) {
-        return NextResponse.json({ message: "حجم تصویر نباید بیشتر از 5 مگابایت باشد" }, { status: 400 });
+      // اعتبارسنجی فایل جدید
+      const fileCheck = validateImageFile(newImage);
+      if (!fileCheck.valid) {
+        return NextResponse.json(
+          { message: fileCheck.message },
+          { status: 400 },
+        );
       }
 
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "categories");
-      await fs.mkdir(uploadDir, { recursive: true });
-      const fileName = `${crypto.randomUUID()}${extensionForType(newImage.type)}`;
-      uploadedFilePath = path.join(uploadDir, fileName);
-      await fs.writeFile(uploadedFilePath, Buffer.from(await newImage.arrayBuffer()));
-      imageUrl = `/uploads/categories/${fileName}`;
+      // آپلود تصویر جدید
+      const result = await uploadImageToCloudinary(newImage, "categories");
+      uploadedPublicId = result.public_id;
+      newPublicId = result.public_id;
+      imageUrl = result.secure_url;
     }
 
+    const oldPublicId = category.imagePublicId;
+
+    // به‌روزرسانی سند
     category.nameFa = validation.data.nameFa;
     category.nameEn = validation.data.nameEn;
     category.isActive = validation.data.isActive;
     category.image = imageUrl;
+    if (newPublicId) {
+      category.imagePublicId = newPublicId;
+    }
     await category.save();
 
-    if (newImage) {
-      const oldFilePath = getCategoryImagePath(oldImageUrl);
-      if (oldFilePath && oldImageUrl !== imageUrl) {
-        await fs.unlink(oldFilePath).catch((error) => {
-          if (error.code !== "ENOENT") {
-            console.error("UPDATE category old image cleanup error:", error);
-          }
-        });
-      }
+    // حذف تصویر قدیمی فقط پس از موفقیت دیتابیس
+    if (newImage && oldPublicId && oldPublicId !== newPublicId) {
+      await deleteImagesFromCloudinary([oldPublicId]).catch((error) => {
+        console.error("UPDATE category old image cleanup error:", error);
+      });
     }
 
-    return NextResponse.json({ message: "دسته بندی با موفقیت ویرایش شد", category }, { status: 200 });
+    return NextResponse.json(
+      { message: "دسته بندی با موفقیت ویرایش شد", category },
+      { status: 200 }
+    );
   } catch (error) {
-    if (uploadedFilePath) {
-      await fs.unlink(uploadedFilePath).catch((cleanupError) => {
+    // Rollback: حذف تصویر جدید در صورت خطا
+    if (uploadedPublicId) {
+      await deleteImagesFromCloudinary([uploadedPublicId]).catch((cleanupError) => {
         console.error("UPDATE category image cleanup error:", cleanupError);
       });
     }
     console.error("PUT /api/categories/[id]:", error);
-    return NextResponse.json({ message: "خطایی در ویرایش دسته بندی رخ داد" }, { status: 500 });
+    return NextResponse.json(
+      { message: "خطایی در ویرایش دسته بندی رخ داد" },
+      { status: 500 }
+    );
   }
 }
 
@@ -163,36 +178,51 @@ export async function DELETE(request, { params }) {
     await connectDB();
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "شناسه دسته بندی معتبر نیست" }, { status: 400 });
+      return NextResponse.json(
+        { message: "شناسه دسته بندی معتبر نیست" },
+        { status: 400 }
+      );
     }
 
     const category = await Category.findById(id);
     if (!category) {
-      return NextResponse.json({ message: "دسته بندی پیدا نشد" }, { status: 404 });
+      return NextResponse.json(
+        { message: "دسته بندی پیدا نشد" },
+        { status: 404 }
+      );
     }
 
     const productCount = await Product.countDocuments({ category: id });
     if (productCount > 0) {
-      return NextResponse.json({
-        message: "این دسته بندی به محصولات متصل است و تا حذف یا انتقال محصولات قابل حذف نیست",
-      }, { status: 409 });
+      return NextResponse.json(
+        {
+          message:
+            "این دسته بندی به محصولات متصل است و تا حذف یا انتقال محصولات قابل حذف نیست",
+        },
+        { status: 409 }
+      );
     }
 
-    const oldImageUrl = category.image;
+    const { imagePublicId } = category;
+
     await Category.findByIdAndDelete(id);
 
-    const oldFilePath = getCategoryImagePath(oldImageUrl);
-    if (oldFilePath) {
-      await fs.unlink(oldFilePath).catch((error) => {
-        if (error.code !== "ENOENT") {
-          console.error("DELETE category image cleanup error:", error);
-        }
+    // حذف تصویر از Cloudinary پس از حذف موفق سند
+    if (imagePublicId) {
+      await deleteImagesFromCloudinary([imagePublicId]).catch((error) => {
+        console.error("DELETE category image cleanup error:", error);
       });
     }
 
-    return NextResponse.json({ message: "دسته بندی با موفقیت حذف شد" }, { status: 200 });
+    return NextResponse.json(
+      { message: "دسته بندی با موفقیت حذف شد" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("DELETE /api/categories/[id]:", error);
-    return NextResponse.json({ message: "خطایی در حذف دسته بندی رخ داد" }, { status: 500 });
+    return NextResponse.json(
+      { message: "خطایی در حذف دسته بندی رخ داد" },
+      { status: 500 }
+    );
   }
 }

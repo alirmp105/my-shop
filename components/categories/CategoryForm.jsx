@@ -8,11 +8,25 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { categoryCreateSchema, categoryUpdateSchema } from "@/schemas/categorySchema";
+import {
+  categoryCreateSchema,
+  categoryUpdateSchema,
+} from "@/schemas/categorySchema";
 
 const createSlug = (text) => text.trim().replace(/\s+/g, "-");
 
@@ -55,7 +69,9 @@ const CategoryForm = ({ mode = "create", category }) => {
         formData.append("image", data.image);
       }
 
-      const url = isEdit ? `/api/categories/${category._id}` : "/api/categories";
+      const url = isEdit
+        ? `/api/categories/${category._id}`
+        : "/api/categories";
       const response = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         body: formData,
@@ -63,7 +79,9 @@ const CategoryForm = ({ mode = "create", category }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        setServerError(result.message || "خطایی رخ داد، لطفاً دوباره تلاش کنید");
+        setServerError(
+          result.message || "خطایی رخ داد، لطفاً دوباره تلاش کنید",
+        );
         return;
       }
 
@@ -79,6 +97,10 @@ const CategoryForm = ({ mode = "create", category }) => {
       setIsSubmitting(false);
     }
   };
+  const removeImage = (onChange) => {
+      onChange(undefined);
+      setImagePreview("");
+    };
 
   return (
     <Card className="w-full sm:max-w-md mx-auto mt-4">
@@ -97,7 +119,9 @@ const CategoryForm = ({ mode = "create", category }) => {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>نام به فارسی</FieldLabel>
                   <Input {...field} aria-invalid={fieldState.invalid} />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
@@ -107,8 +131,14 @@ const CategoryForm = ({ mode = "create", category }) => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>نام به انگلیسی</FieldLabel>
-                  <Input {...field} aria-invalid={fieldState.invalid} dir="ltr" />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    dir="ltr"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
@@ -128,7 +158,10 @@ const CategoryForm = ({ mode = "create", category }) => {
               render={({ field }) => (
                 <Field orientation="horizontal">
                   <FieldLabel>فعال</FieldLabel>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </Field>
               )}
             />
@@ -150,16 +183,22 @@ const CategoryForm = ({ mode = "create", category }) => {
                   />
                   {imagePreview ? (
                     <div className="relative mt-3">
-                      <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-md" />
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-md"
+                      />
                       <Button
                         type="button"
                         size="icon"
                         variant="destructive"
                         className="absolute top-2 right-2"
-                        onClick={() => {
-                          field.onChange(undefined);
-                          setImagePreview(isEdit ? category?.image || "" : "");
-                        }}
+                        // onClick={() => {
+                        //   field.onChange(undefined);
+                        //   setImagePreview(isEdit ? category?.image || "" : "");
+                        // }}
+                        onClick={() => removeImage(field.onChange)}
+
                       >
                         <X />
                       </Button>
@@ -170,11 +209,15 @@ const CategoryForm = ({ mode = "create", category }) => {
                       <span>تصویری انتخاب نشده</span>
                     </div>
                   )}
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
-            {serverError && <p className="text-sm text-destructive">{serverError}</p>}
+            {serverError && (
+              <p className="text-sm text-destructive">{serverError}</p>
+            )}
           </FieldGroup>
         </form>
       </CardContent>
