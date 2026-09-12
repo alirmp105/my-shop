@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const AUTOPLAY_DELAY = 3000;
 
 export default function HeroCarousel({ heroes = [] }) {
-  const slides = heroes.length && heroes ;
+  const slides = heroes.length ? heroes : null;
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
