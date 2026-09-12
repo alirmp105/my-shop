@@ -82,6 +82,7 @@ export function AppSidebar(props) {
           { title: "سفارش‌ها", url: "/orders" },
           { title: "محصولات", url: "/admin/products" },
           { title: "دسته‌بندی‌ها", url: "/admin/categories" },
+          { title: "اسلایدهای Hero", url: "/admin/heroes" },
           { title: "کد تخفیف", url: "/admin/coupon" },
           { title: "برند ها", url: "/admin/brands" },
         ],
